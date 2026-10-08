@@ -1,7 +1,7 @@
-# momtuto 프로젝트 지침
+# momtutor 프로젝트 지침
 
-- 저장소: https://github.com/sujongshim/momtuto (public)
-- 배포 주소: https://momtuto.vercel.app
+- 저장소: https://github.com/sujongshim/momtutor (public)
+- 배포 주소: https://momtutor.vercel.app
 - Vercel projectId: prj_5QXzbEgOvZCSmN2R0AeE0c7SKcTM
 - Vercel orgId(팀): team_PqGD0pAGTdqT5sIEWH00Yg6w (sj-6217 — testbase·ondo와 같은 팀)
 - 구성: 로그인·DB 없는 정적 HTML 단일 페이지(index.html). 누적 방문 카운터는 브라우저 localStorage(기기별).

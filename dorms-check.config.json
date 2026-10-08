@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "엄마 영어 과외",
-    "url": "https://momtuto.vercel.app",
+    "url": "https://momtutor.vercel.app",
     "stack": "정적 HTML"
   },
   "tracks": [
