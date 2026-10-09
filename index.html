@@ -1169,7 +1169,7 @@ var EXAMPLE5=[
     app.appendChild(pn);
     rounds.forEach(function(r){
       var c=mk('div','gc'),h=mk('div','row');
-      h.appendChild(mk('b',null,r.label+' 시험'));h.appendChild(mk('span','src2',(r.range===r.label?'':r.range+' · ')+'단어 '+r.items.length+'개'));
+      h.appendChild(mk('b',null,r.label+' 시험'));h.appendChild(mk('span','src2',(r.range===r.label?'':'앞 번호 누적 · ')+'단어 '+r.items.length+'개'));
       c.appendChild(h);
       var stx=examStats()[r.label];
       if(stx&&stx.n)c.appendChild(mk('p','rec','응시 '+stx.n+'회 · 최고 '+stx.best+' / '+(stx.total||r.items.length)));
