@@ -1125,59 +1125,102 @@ var EXAMPLE5=[
   }
   function tile(label,value){var d=mk('div');d.appendChild(mk('span',null,label));d.appendChild(mk('b',null,String(value)));return d}
 
-  /* ---------- 회차별 단어 시험(누적, 4지선다) + 구글 시트 전송 ---------- */
+  /* ---------- 지문 번호별 단어 시험(객관식 / 주관식) + 구글 시트 전송 ---------- */
+  var EXAM_TYPES=['객관식','주관식'];
   function examRounds(){
     var ap=allPassages(),nums=[],seen={};
     ap.forEach(function(p){if(!seen[p.no]&&vocabItems([p]).length){seen[p.no]=1;nums.push(p.no)}});
     nums.sort(function(a,b){return a-b});
-    return nums.map(function(n,i){
-      var pl=ap.filter(function(p){return p.no<=n});
-      var lb=nums[0]===n?(n+'번'):(nums[0]+'~'+n+'번');
-      return {k:i+1,n:n,label:lb,range:nums[0]===n?lb:(lb+' 누적'),items:vocabItems(pl)};
+    return nums.map(function(n){
+      var pl=ap.filter(function(p){return p.no===n});
+      return {n:n,label:n+'번',items:vocabItems(pl)};
     });
   }
-  function startExam(r,name){
+  function examKey(r,type){return r.label+'|'+type}
+  function examStats(){try{return JSON.parse(localStorage.getItem('momtutor_exam_stats2')||'{}')}catch(e){return {}}}
+  function examHistory(){try{return JSON.parse(localStorage.getItem('momtutor_exams2')||'[]')}catch(e){return []}}
+  /* 주관식 채점: 대소문자·공백·문장부호는 무시, 스펠링은 정확히 */
+  function spellNorm(x,dropPlaceholders){
+    var t=String(x||'').replace(/[’‘]/g,"'").replace(/\([^)]*\)/g,' ');
+    if(dropPlaceholders)t=t.split(/\s+/).filter(function(w){return !/^(~|~ing|-ing|A|B)$/.test(w)}).join(' ');
+    return t.toLowerCase().replace(/[~\-;,.!?]/g,' ').replace(/\s+/g,' ').trim();
+  }
+  function spellOk(it,ans){
+    var n=spellNorm(ans);if(!n)return false;
+    return [it.h,it.p].some(function(c){return c&&(spellNorm(c)===n||spellNorm(c,true)===n)});
+  }
+  function spellHint(it){
+    var w=spellNorm(it.h,true).split(' ');
+    return '첫 글자 "'+w[0].charAt(0)+'" · '+w.length+'단어';
+  }
+  function startExam(r,name,type){
     var pool=vocabItems(allPassages()).map(function(x){return x.m}).filter(function(m){return m&&m.length<=40});
     var qs=shuffle(r.items.slice()).map(function(it){
-      var d=[];shuffle(pool.slice()).forEach(function(m){if(m!==it.m&&d.indexOf(m)<0&&d.length<3)d.push(m)});
-      return {it:it,opts:shuffle([it.m].concat(d))};
+      var d=[];
+      if(type==='객관식')shuffle(pool.slice()).forEach(function(m){if(m!==it.m&&d.indexOf(m)<0&&d.length<3)d.push(m)});
+      return {it:it,opts:type==='객관식'?shuffle([it.m].concat(d)):null,ans:'',ok:false};
     });
-    var attempt=((examStats()[r.label]||{}).n||0)+1;
-    state.exam={r:r,name:name,qs:qs,i:0,ok:0,wrong:[],done:false,sent:'idle',attempt:attempt};
+    var attempt=((examStats()[examKey(r,type)]||{}).n||0)+1;
+    state.exam={r:r,name:name,type:type,qs:qs,i:0,ok:0,wrong:[],done:false,sent:'idle',attempt:attempt};
     render();
   }
   function sendExam(ex){
     ex.sent='sending';
-    var body=JSON.stringify({name:ex.name,round:ex.r.label,range:ex.r.range+' · '+ex.attempt+'번째 응시',score:ex.ok,total:ex.qs.length,wrong:ex.wrong.map(function(w){return w.h})});
+    var wrong=ex.qs.filter(function(q){return !q.ok}).map(function(q){return ex.type==='주관식'?q.it.h+' (내 답: '+(q.ans||'무응답')+')':q.it.h});
+    var body=JSON.stringify({name:ex.name,round:ex.r.label,range:ex.type+' · '+ex.attempt+'번째 응시',score:ex.ok,total:ex.qs.length,wrong:wrong});
     fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:body})
       .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
       .then(function(x){ex.sent=(x.j&&x.j.ok)?'ok':(x.s===503?'noconfig':'fail');if(state.exam===ex)render()})
       .catch(function(){ex.sent='fail';if(state.exam===ex)render()});
   }
-  function examStats(){try{return JSON.parse(localStorage.getItem('momtutor_exam_stats')||'{}')}catch(e){return {}}}
-  function examHistory(){try{return JSON.parse(localStorage.getItem('momtutor_exams')||'[]')}catch(e){return []}}
+  function finishExam(ex){
+    ex.done=true;
+    try{
+      var stt=examStats(),k=examKey(ex.r,ex.type),cur=stt[k]||{n:0,best:0};
+      cur.n=ex.attempt;cur.best=Math.max(cur.best||0,ex.ok);cur.total=ex.qs.length;stt[k]=cur;
+      localStorage.setItem('momtutor_exam_stats2',JSON.stringify(stt));
+      var h=examHistory();h.push({t:Date.now(),round:ex.r.label+' '+ex.type+' '+ex.attempt+'번째',score:ex.ok,total:ex.qs.length});
+      localStorage.setItem('momtutor_exams2',JSON.stringify(h.slice(-30)));
+    }catch(e){}
+    sendExam(ex);
+  }
+  function answerExam(ex,ans,ok){
+    var q=ex.qs[ex.i];q.ans=ans;q.ok=ok;
+    if(ok)ex.ok++;else ex.wrong.push(q.it);
+    ex.i++;
+    if(ex.i>=ex.qs.length)finishExam(ex);
+    render();
+  }
   function vExam(app){
     var rounds=examRounds(),nm='';
     try{nm=localStorage.getItem('momtutor_name')||''}catch(e){}
     var pn=mk('section','panel');
     pn.appendChild(mk('h2',null,'지문 번호별 단어 시험'));
-    pn.appendChild(mk('p','lead','번호가 올라갈수록 앞 번호의 단어가 누적됩니다. 예: 6번 시험 = 2번 + 6번 단어. 4지선다이고, 끝나면 결과가 구글 시트로 전송됩니다.'));
+    pn.appendChild(mk('p','lead','선택한 번호의 단어로만 출제됩니다. 시험이 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.'));
     var row=mk('div','row');row.appendChild(mk('label',null,'이름'));
     var inp=mk('input');inp.type='text';inp.maxLength=30;inp.value=nm;inp.placeholder='이름을 적어 주세요';inp.className='grow';inp.id='exam-name';
     row.appendChild(inp);pn.appendChild(row);
+    if(!state.examType)state.examType='객관식';
+    chips(pn,'유형',EXAM_TYPES,state.examType,function(v){
+      var cur=document.getElementById('exam-name');
+      try{if(cur&&cur.value.trim())localStorage.setItem('momtutor_name',cur.value.trim())}catch(e){}
+      state.examType=v;render();
+    });
+    pn.appendChild(mk('p','status',state.examType==='객관식'?'객관식: 영어 단어를 보고 알맞은 뜻을 4개 중에서 고릅니다.':'주관식: 한글 뜻을 보고 영어 단어·표현을 직접 씁니다. 대소문자는 구분하지 않고 스펠링은 정확해야 합니다.'));
     if(state.msg)pn.appendChild(mk('p','status err',state.msg));
     app.appendChild(pn);
+    var stats=examStats();
     rounds.forEach(function(r){
       var c=mk('div','gc'),h=mk('div','row');
-      h.appendChild(mk('b',null,r.label+' 시험'));h.appendChild(mk('span','src2',(r.range===r.label?'':'앞 번호 누적 · ')+'단어 '+r.items.length+'개'));
+      h.appendChild(mk('b',null,r.label+' 시험'));h.appendChild(mk('span','src2','단어 '+r.items.length+'개'));
       c.appendChild(h);
-      var stx=examStats()[r.label];
-      if(stx&&stx.n)c.appendChild(mk('p','rec','응시 '+stx.n+'회 · 최고 '+stx.best+' / '+(stx.total||r.items.length)));
-      c.appendChild(btn(stx&&stx.n?'다시 시험 보기':'시험 보기','outline',function(){
+      EXAM_TYPES.forEach(function(t){var st=stats[examKey(r,t)];if(st&&st.n)c.appendChild(mk('p','rec',t+' · 응시 '+st.n+'회 · 최고 '+st.best+' / '+(st.total||r.items.length)))});
+      var cur=stats[examKey(r,state.examType)];
+      c.appendChild(btn((cur&&cur.n?'다시 ':'')+state.examType+' 시험 보기','outline',function(){
         var v=inp.value.trim();
         if(!v){state.msg='이름을 먼저 적어 주세요.';render();return}
         state.msg='';try{localStorage.setItem('momtutor_name',v)}catch(e){}
-        startExam(r,v);
+        startExam(r,v,state.examType);
       }));
       app.appendChild(c);
     });
@@ -1195,52 +1238,61 @@ var EXAMPLE5=[
     var ex=state.exam,panel=mk('section','panel');
     if(ex.done){
       var total=ex.qs.length,pct=Math.round(ex.ok/total*100);
-      panel.appendChild(mk('h2',null,ex.r.label+' '+ex.attempt+'번째 시험 결과'));
-      var stat=mk('div','stat');
-      [['점수',ex.ok+' / '+total],['정답률',pct+'%'],['이름',ex.name]].forEach(function(x){var d=mk('div');d.appendChild(mk('span',null,x[0]));d.appendChild(mk('b',null,x[1]));stat.appendChild(d)});
-      panel.appendChild(stat);
+      panel.appendChild(mk('h2',null,ex.r.label+' '+ex.type+' 시험 결과 · '+ex.attempt+'번째'));
+      var big=mk('p','qstem big',ex.ok+' / '+total+'  ('+pct+'점)');
+      panel.appendChild(big);
+      panel.appendChild(mk('p','lead',ex.name+' · 맞힌 단어 '+ex.ok+'개, 틀린 단어 '+(total-ex.ok)+'개'));
       var msg={sending:'구글 시트에 저장하는 중입니다.',ok:'구글 시트에 저장했습니다.',noconfig:'아직 구글 시트가 연결되지 않아 점수는 이 화면에만 표시됩니다.',fail:'시트 저장에 실패했습니다. 인터넷을 확인하고 다시 보내 주세요.',idle:''}[ex.sent]||'';
       if(msg)panel.appendChild(mk('p','status'+(ex.sent==='fail'?' err':''),msg));
       if(ex.sent==='fail'||ex.sent==='noconfig')panel.appendChild(btn('다시 보내기',null,function(){sendExam(ex);render()}));
-      if(ex.wrong.length){
-        panel.appendChild(mk('p','lead','틀린 단어'));
-        var ul=mk('ul','wbl');
-        ex.wrong.forEach(function(it){var li=mk('li');li.appendChild(mk('div','wh',it.h));li.appendChild(mk('div','wm',it.m));ul.appendChild(li)});
-        panel.appendChild(ul);
-      }
+      panel.appendChild(mk('p','lead','문제별 채점'));
+      var ul=mk('ul','wbl');
+      ex.qs.forEach(function(q){
+        var li=mk('li'),hd=mk('div','wh');
+        hd.appendChild(mk('span',null,(q.ok?'○ ':'✕ ')+(ex.type==='객관식'?q.it.h:q.it.m)));
+        li.appendChild(hd);
+        if(ex.type==='객관식'){
+          li.appendChild(mk('div','wm','정답: '+q.it.m));
+          if(!q.ok)li.appendChild(mk('div','ws','내 답: '+(q.ans||'무응답')));
+        }else{
+          li.appendChild(mk('div','wm','정답: '+q.it.h));
+          if(!q.ok)li.appendChild(mk('div','ws','내 답: '+(q.ans||'무응답')));
+        }
+        ul.appendChild(li);
+      });
+      panel.appendChild(ul);
       var r2=mk('div','row');
-      if(ex.wrong.length)r2.appendChild(btn('단어 탭에서 복습하기','primary',function(){
-        state.exam=null;state.vs=null;state.vtab='words';
-        render();
-      }));
-      r2.appendChild(btn('같은 시험 다시 보기','outline',function(){startExam(ex.r,ex.name)}));
+      r2.appendChild(btn('같은 시험 다시 보기','outline',function(){startExam(ex.r,ex.name,ex.type)}));
+      if(ex.wrong.length)r2.appendChild(btn('단어 탭에서 복습하기','primary',function(){state.exam=null;state.vs=null;state.vtab='words';render()}));
       r2.appendChild(btn('끝내기',null,function(){state.exam=null;render()}));
       panel.appendChild(r2);app.appendChild(panel);return;
     }
     var q=ex.qs[ex.i];
     var top=mk('div','bar');
-    top.appendChild(mk('span','cnt',ex.r.label+' '+ex.attempt+'번째 · '+(ex.i+1)+' / '+ex.qs.length));
+    top.appendChild(mk('span','cnt',ex.r.label+' '+ex.type+' '+ex.attempt+'번째 · '+(ex.i+1)+' / '+ex.qs.length));
     top.appendChild(btn('그만하기',null,function(){state.exam=null;render()}));
     panel.appendChild(top);
     var pg=mk('div','prog'),bar=mk('i');bar.style.width=(ex.i/ex.qs.length*100)+'%';pg.appendChild(bar);panel.appendChild(pg);
     var box=mk('div','qbox');
-    box.appendChild(mk('p','status','뜻으로 알맞은 것을 고르세요.'));
-    box.appendChild(mk('p','qstem big',q.it.h));
-    var opts=mk('div','opts');
-    q.opts.forEach(function(o){
-      opts.appendChild(btn(o,'opt',function(){
-        if(o===q.it.m)ex.ok++;else ex.wrong.push(q.it);
-        ex.i++;
-        if(ex.i>=ex.qs.length){
-          ex.done=true;
-          try{var stt=examStats(),cur=stt[ex.r.label]||{n:0,best:0};cur.n=ex.attempt;cur.best=Math.max(cur.best||0,ex.ok);cur.total=ex.qs.length;stt[ex.r.label]=cur;localStorage.setItem('momtutor_exam_stats',JSON.stringify(stt));
-            var h=examHistory();h.push({t:Date.now(),round:ex.r.label+' '+ex.attempt+'번째',score:ex.ok,total:ex.qs.length});localStorage.setItem('momtutor_exams',JSON.stringify(h.slice(-30)))}catch(e){}
-          sendExam(ex);
-        }
-        render();
-      }));
-    });
-    box.appendChild(opts);panel.appendChild(box);app.appendChild(panel);
+    if(ex.type==='객관식'){
+      box.appendChild(mk('p','status','뜻으로 알맞은 것을 고르세요.'));
+      box.appendChild(mk('p','qstem big',q.it.h));
+      var opts=mk('div','opts');
+      q.opts.forEach(function(o){opts.appendChild(btn(o,'opt',function(){answerExam(ex,o,o===q.it.m)}))});
+      box.appendChild(opts);
+    }else{
+      box.appendChild(mk('p','status','뜻에 맞는 영어 단어·표현을 쓰세요.'));
+      box.appendChild(mk('p','qstem big',q.it.m));
+      box.appendChild(mk('p','status',spellHint(q.it)));
+      var ti=mk('input');ti.type='text';ti.id='exam-answer';ti.autocomplete='off';ti.setAttribute('autocapitalize','none');ti.setAttribute('spellcheck','false');ti.placeholder='영어로 쓰세요';
+      var submit=function(){answerExam(ex,ti.value.trim(),spellOk(q.it,ti.value))};
+      ti.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();submit()}});
+      box.appendChild(ti);
+      var rr=mk('div','row');rr.appendChild(btn(ex.i+1>=ex.qs.length?'제출하고 결과 보기':'다음','primary',submit));
+      box.appendChild(rr);
+      setTimeout(function(){try{ti.focus()}catch(e){}},0);
+    }
+    panel.appendChild(box);app.appendChild(panel);
   }
 
   function viewVocab(app){
