@@ -1125,16 +1125,129 @@ var EXAMPLE5=[
   }
   function tile(label,value){var d=mk('div');d.appendChild(mk('span',null,label));d.appendChild(mk('b',null,String(value)));return d}
 
+  /* ---------- 회차별 단어 시험(누적, 4지선다) + 구글 시트 전송 ---------- */
+  function examRounds(){
+    var ap=allPassages(),nums=[],seen={};
+    ap.forEach(function(p){if(!seen[p.no]&&vocabItems([p]).length){seen[p.no]=1;nums.push(p.no)}});
+    nums.sort(function(a,b){return a-b});
+    return nums.map(function(n,i){
+      var pl=ap.filter(function(p){return p.no<=n});
+      return {k:i+1,n:n,label:(i+1)+'회차',range:nums[0]===n?(n+'번'):(nums[0]+'~'+n+'번 누적'),items:vocabItems(pl)};
+    });
+  }
+  function startExam(r,name){
+    var pool=vocabItems(allPassages()).map(function(x){return x.m}).filter(function(m){return m&&m.length<=40});
+    var qs=shuffle(r.items.slice()).map(function(it){
+      var d=[];shuffle(pool.slice()).forEach(function(m){if(m!==it.m&&d.indexOf(m)<0&&d.length<3)d.push(m)});
+      return {it:it,opts:shuffle([it.m].concat(d))};
+    });
+    state.exam={r:r,name:name,qs:qs,i:0,ok:0,wrong:[],done:false,sent:'idle'};
+    render();
+  }
+  function sendExam(ex){
+    ex.sent='sending';
+    var body=JSON.stringify({name:ex.name,round:ex.r.label,range:ex.r.range,score:ex.ok,total:ex.qs.length,wrong:ex.wrong.map(function(w){return w.h})});
+    fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:body})
+      .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+      .then(function(x){ex.sent=(x.j&&x.j.ok)?'ok':(x.s===503?'noconfig':'fail');if(state.exam===ex)render()})
+      .catch(function(){ex.sent='fail';if(state.exam===ex)render()});
+  }
+  function examHistory(){try{return JSON.parse(localStorage.getItem('momtutor_exams')||'[]')}catch(e){return []}}
+  function vExam(app){
+    var rounds=examRounds(),nm='';
+    try{nm=localStorage.getItem('momtutor_name')||''}catch(e){}
+    var pn=mk('section','panel');
+    pn.appendChild(mk('h2',null,'회차별 단어 시험'));
+    pn.appendChild(mk('p','lead','회차가 올라갈수록 앞 번호의 단어가 누적됩니다. 4지선다이고, 끝나면 결과가 구글 시트로 전송됩니다.'));
+    var row=mk('div','row');row.appendChild(mk('label',null,'이름'));
+    var inp=mk('input');inp.type='text';inp.maxLength=30;inp.value=nm;inp.placeholder='이름을 적어 주세요';inp.className='grow';inp.id='exam-name';
+    row.appendChild(inp);pn.appendChild(row);
+    if(state.msg)pn.appendChild(mk('p','status err',state.msg));
+    app.appendChild(pn);
+    rounds.forEach(function(r){
+      var c=mk('div','gc'),h=mk('div','row');
+      h.appendChild(mk('b',null,r.label));h.appendChild(mk('span','src2',r.range+' · 단어 '+r.items.length+'개'));
+      c.appendChild(h);
+      c.appendChild(btn('시험 보기','outline',function(){
+        var v=inp.value.trim();
+        if(!v){state.msg='이름을 먼저 적어 주세요.';render();return}
+        state.msg='';try{localStorage.setItem('momtutor_name',v)}catch(e){}
+        startExam(r,v);
+      }));
+      app.appendChild(c);
+    });
+    var hist=examHistory();
+    if(hist.length){
+      var hp=mk('section','panel');hp.appendChild(mk('h2',null,'지난 시험 결과'));
+      hist.slice(-8).reverse().forEach(function(x){
+        var d=new Date(x.t);
+        hp.appendChild(mk('div','rec',(d.getMonth()+1)+'월 '+d.getDate()+'일 · '+x.round+' · '+x.score+' / '+x.total+' ('+Math.round(x.score/x.total*100)+'%)'));
+      });
+      app.appendChild(hp);
+    }
+  }
+  function viewExam(app){
+    var ex=state.exam,panel=mk('section','panel');
+    if(ex.done){
+      var total=ex.qs.length,pct=Math.round(ex.ok/total*100);
+      panel.appendChild(mk('h2',null,ex.r.label+' 시험 결과'));
+      var stat=mk('div','stat');
+      [['점수',ex.ok+' / '+total],['정답률',pct+'%'],['이름',ex.name]].forEach(function(x){var d=mk('div');d.appendChild(mk('span',null,x[0]));d.appendChild(mk('b',null,x[1]));stat.appendChild(d)});
+      panel.appendChild(stat);
+      var msg={sending:'구글 시트에 저장하는 중입니다.',ok:'구글 시트에 저장했습니다.',noconfig:'아직 구글 시트가 연결되지 않아 점수는 이 화면에만 표시됩니다.',fail:'시트 저장에 실패했습니다. 인터넷을 확인하고 다시 보내 주세요.',idle:''}[ex.sent]||'';
+      if(msg)panel.appendChild(mk('p','status'+(ex.sent==='fail'?' err':''),msg));
+      if(ex.sent==='fail'||ex.sent==='noconfig')panel.appendChild(btn('다시 보내기',null,function(){sendExam(ex);render()}));
+      if(ex.wrong.length){
+        panel.appendChild(mk('p','lead','틀린 단어'));
+        var ul=mk('ul','wbl');
+        ex.wrong.forEach(function(it){var li=mk('li');li.appendChild(mk('div','wh',it.h));li.appendChild(mk('div','wm',it.m));ul.appendChild(li)});
+        panel.appendChild(ul);
+      }
+      var r2=mk('div','row');
+      if(ex.wrong.length)r2.appendChild(btn('단어 탭에서 복습하기','primary',function(){
+        state.exam=null;state.vs=null;state.vtab='words';
+        render();
+      }));
+      r2.appendChild(btn('끝내기',null,function(){state.exam=null;render()}));
+      panel.appendChild(r2);app.appendChild(panel);return;
+    }
+    var q=ex.qs[ex.i];
+    var top=mk('div','bar');
+    top.appendChild(mk('span','cnt',ex.r.label+' · '+(ex.i+1)+' / '+ex.qs.length));
+    top.appendChild(btn('그만하기',null,function(){state.exam=null;render()}));
+    panel.appendChild(top);
+    var pg=mk('div','prog'),bar=mk('i');bar.style.width=(ex.i/ex.qs.length*100)+'%';pg.appendChild(bar);panel.appendChild(pg);
+    var box=mk('div','qbox');
+    box.appendChild(mk('p','status','뜻으로 알맞은 것을 고르세요.'));
+    box.appendChild(mk('p','qstem big',q.it.h));
+    var opts=mk('div','opts');
+    q.opts.forEach(function(o){
+      opts.appendChild(btn(o,'opt',function(){
+        if(o===q.it.m)ex.ok++;else ex.wrong.push(q.it);
+        ex.i++;
+        if(ex.i>=ex.qs.length){
+          ex.done=true;
+          try{var h=examHistory();h.push({t:Date.now(),round:ex.r.label,score:ex.ok,total:ex.qs.length});localStorage.setItem('momtutor_exams',JSON.stringify(h.slice(-30)))}catch(e){}
+          sendExam(ex);
+        }
+        render();
+      }));
+    });
+    box.appendChild(opts);panel.appendChild(box);app.appendChild(panel);
+  }
+
   function viewVocab(app){
     if(state.vs){viewSession(app);return}
+    if(state.exam){viewExam(app);return}
     var items=vocabItems(allPassages());
     app.appendChild(mk('h2',null,'누적 단어장'));
     app.appendChild(mk('p','lead','지문에서 연보라로 표시한 단어·표현이 모입니다. 알아요를 누르면 1 → 3 → 7 → 14 → 30 → 60일 뒤에 다시 나옵니다.'));
     var tabs=mk('div','chips');
-    [['today','오늘'],['words','단어'],['rec','기록']].forEach(function(t){tabs.appendChild(btn(t[1],'pill'+(state.vtab===t[0]?' on':''),function(){state.vtab=t[0];state.msg='';render()}))});
+    [['today','오늘'],['words','단어'],['exam','시험'],['rec','기록']].forEach(function(t){tabs.appendChild(btn(t[1],'pill'+(state.vtab===t[0]?' on':''),function(){state.vtab=t[0];state.msg='';render()}))});
     app.appendChild(tabs);
     if(!items.length){app.appendChild(mk('p','status','표시된 단어·표현이 아직 없습니다.'));return}
-    if(state.vtab==='words')vWords(app,items);
+    if(state.vtab==='exam')vExam(app);
+    else if(state.vtab==='words')vWords(app,items);
     else if(state.vtab==='rec')vRecord(app,items);
     else vToday(app,items);
   }
