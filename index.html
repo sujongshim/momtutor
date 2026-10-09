@@ -103,6 +103,8 @@ button:disabled{opacity:.55;cursor:default}
 .keyu{text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:2px;text-underline-offset:5px}
 .nt{position:absolute;left:0;top:calc(-1em + .28rem);font-family:var(--sans);font-size:.64rem;font-weight:700;line-height:1;white-space:nowrap;pointer-events:none;text-decoration:none}
 .nt.g1{color:var(--ink-gram)}.nt.g2{color:var(--ink-vocab)}.nt.g3{color:var(--ink-pron)}.nt.g7{color:var(--ink-link)}
+.nt.g8{color:var(--red);font-size:.8rem}
+.gap .nt.g8::after{content:none}
 .nt.g0{color:var(--red)}.nt.g4,.nt.g5{color:var(--par)}.nt.g6{color:var(--fg)}
 .gap{position:relative;display:inline-block;width:0;height:0}
 .gap .nt{left:0;top:auto;bottom:.67rem;transform:translateX(-50%)}
@@ -283,7 +285,7 @@ button:disabled{opacity:.55;cursor:default}
      {label:`병렬`,phrase:`the bigger`,type:`병렬`,explanation:`같은 구문 병렬. the bigger our fences (are).`},
      {label:`병렬`,phrase:`the more`,ctx:`the more sophisticated`,type:`병렬`,explanation:`같은 구문 병렬. our security (is) 생략.`},
      {label:``,phrase:`sophisticated`,type:`어휘`,entry:`sophisticated`,meaning:`정교한, 세련된`,explanation:`the more sophisticated our security = 보안이 더 정교해진다.`},
-     {label:`부사적 용법(목적)`,phrase:`to keep people away`,type:`어법`,explanation:`to부정사의 부사적 용법(목적).`},
+     {label:`부사적 용법(목적)`,phrase:`to keep people away`,eq:`people`,type:`어법`,explanation:`to부정사의 부사적 용법(목적). 또 keep people away는 5형식(S + V + O + OC): people(O) = away(OC), 사람들이 멀리 있게 하다.`},
      {label:`병렬`,phrase:`the less`,type:`병렬`,explanation:`같은 구문 병렬. the less we want to share.`}]},
    {text:`Our desire for more, combined with our increased physical interaction with the "common folk," starts to create a disconnection or blindness to reality.`,
     translation:`더 많이 가지려는 욕망은, "평범한 사람들"과의 접촉이 늘어난 것과 결합되어, 현실과의 단절이나 현실에 대한 무감각을 낳기 시작한다.`,
@@ -361,7 +363,7 @@ var EXAMPLE3=[
     translation:`우리는 통계를 멀리 떨어진 사건에 대한 보고로 읽고, 그래서 방해받지 않고 인간을 (마주할) 수 있게 된다.`,
     points:[
      {label:``,phrase:`read the statistics as`,type:`어휘`,entry:`read A as B`,meaning:`A를 B로 읽다, 해석하다`,explanation:`read A as B = A를 B로 받아들임.`},
-     {label:`분사구문`,phrase:`thus allowing us to`,type:`어법`,explanation:`결과 분사구문. = and thus it allows us to ~.`},
+     {label:`분사구문`,phrase:`thus allowing us to`,eq:` us`,type:`어법`,explanation:`결과 분사구문. = and thus it allows us to ~. 또 allow + O + to V는 5형식(S + V + O + OC): us(O) = to escape(OC).`},
      {label:`⑤`,phrase:`escape`,type:`보기`,meaning:`피하다`,explanation:`부적절. encounter(마주하다)가 적절. 거리를 두고 통계로 보면 방해받지 않고 사람들을 접하게 됨.`},
      {label:`수동 동명사`,phrase:`without being disturbed`,type:`어법`,explanation:`without + being p.p. 방해받지 않고.`}]},
    {text:`Statistics are human beings with the tears wiped off.`,
@@ -566,16 +568,19 @@ var EXAMPLE5=[
       var pt=sp.pt,g=grp(pt.type),phrase=text.slice(sp.s,sp.e);
       var m=mk('mark','g'+g);m.tabIndex=0;
       var label=(pt.label!=null)?pt.label:(g===2?'':NAMES[g]);
-      var cut=-1;
+      var cuts=[],cut=-1;
       if(pt.at){var k=phrase.indexOf(pt.at);if(k>=0)cut=k+pt.at.length}
-      if(cut>0){
-        put(m,phrase.slice(0,cut),sp.s);
-        var gp=mk('span','gap');if(label)gp.appendChild(mk('span','nt g'+g,label));m.appendChild(gp);
-        put(m,phrase.slice(cut),sp.s+cut);
-      }else{
-        if(label)m.appendChild(mk('span','nt g'+g,label));
-        put(m,phrase,sp.s);
-      }
+      if(cut>0)cuts.push({p:cut,label:label,g:g});
+      else if(label)m.appendChild(mk('span','nt g'+g,label));
+      if(pt.eq){var q=phrase.indexOf(pt.eq);if(q>=0)cuts.push({p:q+pt.eq.length,label:'=',g:8})}
+      cuts.sort(function(a,b){return a.p-b.p});
+      var last=0;
+      cuts.forEach(function(c){
+        put(m,phrase.slice(last,c.p),sp.s+last);
+        var gp=mk('span','gap');if(c.label)gp.appendChild(mk('span','nt g'+c.g,c.label));m.appendChild(gp);
+        last=c.p;
+      });
+      put(m,phrase.slice(last),sp.s+last);
       var go=function(){openPop(passage,m,pt)};
       m.addEventListener('click',go);
       m.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
