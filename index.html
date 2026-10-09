@@ -178,6 +178,7 @@ button:disabled{opacity:.55;cursor:default}
 .gd table{border-collapse:collapse;width:100%;font-size:.85rem}
 .gd th,.gd td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
 .gd th{background:var(--soft)}
+.outline,button.outline{background:transparent;border:1.5px solid var(--btn-line);color:var(--ink-gram);font-weight:700}
 .foot{font-size:.8rem;color:var(--muted);margin:0}
 
 .visit{font-size:.8rem;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 10px;background:var(--surface);white-space:nowrap}
@@ -771,47 +772,38 @@ var EXAMPLE5=[
     var opts=shuffle([correct].concat(shuffle(d).slice(0,3)));
     return {stem:stem,correct:correct,options:opts,note:note};
   }
-  /* ---------- 문장 해석 연습 ---------- */
-  function viewTranslate(parent,quiz){
-    var panel=mk('section','panel'),item=quiz.list[quiz.i];
+  /* ---------- 어법 문제 뒤: 같은 어법의 짧은 문장 해석 ---------- */
+  function quizAdvance(quiz){
+    quiz.tr=null;quiz.i++;
+    if(quiz.i>=quiz.list.length){quiz.done=true;var st=load();st.log.push({t:Date.now(),k:quiz.kind,n:quiz.list.length,ok:quiz.ok});st.log=st.log.slice(-30);save()}
+    render();
+  }
+  function viewSimTranslate(parent,quiz){
+    var panel=mk('section','panel'),item=quiz.tr.item,ex=quiz.tr.ex;
     var top=mk('div','bar');
-    top.appendChild(mk('span','cnt',(quiz.i+1)+' / '+quiz.list.length));
+    top.appendChild(mk('span','cnt',(quiz.i+1)+' / '+quiz.list.length+' · 해석 문제'));
     top.appendChild(btn('그만하기',null,function(){state.quiz=null;render()}));
     panel.appendChild(top);
-    var pg=mk('div','prog'),bar=mk('i');bar.style.width=(quiz.i/quiz.list.length*100)+'%';pg.appendChild(bar);panel.appendChild(pg);
+    var pg=mk('div','prog'),bar=mk('i');bar.style.width=((quiz.i+.5)/quiz.list.length*100)+'%';pg.appendChild(bar);panel.appendChild(pg);
     var box=mk('div','qbox');
-    box.appendChild(mk('p','status','우리말로 해석해 보세요. 색으로 표시된 부분이 이번에 연습할 어법입니다. ('+item.src+')'));
-    box.appendChild(markSentence(item.s,item.pt));
+    box.appendChild(mk('p','status','방금 푼 어법 "'+(item.label||'어법')+'"이(가) 들어간 짧은 문장입니다. 우리말로 해석해 보세요.'));
+    var ph=ex[2],pt=Array.isArray(ph)?{type:item.pt.type,phrase:ph[0],parts:ph.map(function(q){return {phrase:q}})}:{phrase:ph,type:item.pt.type};
+    box.appendChild(markSentence(ex[0],pt));
     var ta=mk('textarea');ta.rows=3;ta.placeholder='내 해석을 적어 보세요 (적지 않아도 됩니다)';ta.style.minHeight='80px';ta.style.fontFamily='var(--sans)';ta.style.fontSize='.95rem';
     box.appendChild(ta);
     var fb=mk('div'),row=mk('div','row');
-    var hintBox=mk('div'),hb=btn('어법 힌트 보기',null,function(){
-      hb.disabled=true;
-      hintBox.className='fb';
-      hintBox.appendChild(mk('b',null,(item.label||'어법')+' '));
-      hintBox.appendChild(document.createTextNode(item.pt.explanation||''));
-    });
+    var last=quiz.i+1>=quiz.list.length;
     var sb=btn('정답 해석 보기','primary',function(){
-      sb.disabled=true;hb.disabled=true;ta.disabled=true;
+      sb.disabled=true;ta.disabled=true;
       fb.className='fb';
       fb.appendChild(mk('b',null,'모범 해석'));
-      fb.appendChild(mk('p',null,item.tr||'(해석이 등록되지 않은 문장입니다)'));
-      if(!hintBox.firstChild){fb.appendChild(mk('b',null,(item.label||'어법')+' '));fb.appendChild(document.createTextNode(item.pt.explanation||''))}
-      fb.appendChild(mk('p','status','내 해석과 비교해 보고, 아래에서 스스로 체크하세요.'));
-      var gr=mk('div','gr');
-      function done(ok){
-        if(ok)quiz.ok++;else quiz.wrong.push(item);
-        updateRec('gram',item.k,ok,item.pid);
-        quiz.i++;
-        if(quiz.i>=quiz.list.length){quiz.done=true;var st=load();st.log.push({t:Date.now(),k:'gram',n:quiz.list.length,ok:quiz.ok});st.log=st.log.slice(-30);save()}
-        render();
-      }
-      gr.appendChild(btn('잘 해석했어요','okb',function(){done(true)}));
-      gr.appendChild(btn('다시 볼래요','no',function(){done(false)}));
-      fb.appendChild(gr);
+      fb.appendChild(mk('p',null,ex[1]));
+      fb.appendChild(mk('b',null,(item.label||'어법')+' '));
+      fb.appendChild(document.createTextNode(item.pt.explanation||''));
+      var nr=mk('div','row');nr.appendChild(btn(last?'결과 보기':'다음 문제','primary',function(){quizAdvance(quiz)}));
+      fb.appendChild(nr);
     });
-    row.appendChild(sb);row.appendChild(hb);
-    box.appendChild(row);box.appendChild(hintBox);box.appendChild(fb);
+    row.appendChild(sb);box.appendChild(row);box.appendChild(fb);
     panel.appendChild(box);parent.appendChild(panel);
   }
 
@@ -840,7 +832,7 @@ var EXAMPLE5=[
       row.appendChild(btn('끝내기',null,function(){state.quiz=null;render()}));
       panel.appendChild(row);parent.appendChild(panel);return;
     }
-    if(quiz.mode==='translate'){viewTranslate(parent,quiz);return}
+    if(quiz.tr){viewSimTranslate(parent,quiz);return}
     var item=quiz.list[quiz.i],q=buildQuestion(quiz,item);
     var top=mk('div','bar');
     top.appendChild(mk('span','cnt',(quiz.i+1)+' / '+quiz.list.length));
@@ -860,13 +852,9 @@ var EXAMPLE5=[
         updateRec(quiz.kind,item.k,ok,item.pid);
         fb.className='fb '+(ok?'ok':'no');
         var t=mk('b',null,ok?'정답입니다. ':'오답입니다. ');fb.appendChild(t);fb.appendChild(q.note);
-        if(quiz.kind==='gram'&&simOf(item)){
-          var sim=mk('div');fb.appendChild(mk('div')).appendChild(btn('비슷한 예문 보기',null,function(){showSimilar(item,sim)}));fb.appendChild(sim);
-        }
-        nextRow.appendChild(btn(quiz.i+1>=quiz.list.length?'결과 보기':'다음 문제','primary',function(){
-          quiz.i++;if(quiz.i>=quiz.list.length){quiz.done=true;
-            var st=load();st.log.push({t:Date.now(),k:quiz.kind,n:quiz.list.length,ok:quiz.ok});st.log=st.log.slice(-30);save()}
-          render()}));
+        var sx=quiz.kind==='gram'?simOf(item):null;
+        if(sx)nextRow.appendChild(btn('같은 어법 문장 해석하기','primary',function(){quiz.tr={item:item,ex:sx[quiz.i%sx.length]};render()}));
+        else nextRow.appendChild(btn(quiz.i+1>=quiz.list.length?'결과 보기':'다음 문제','primary',function(){quizAdvance(quiz)}));
       });
       opts.appendChild(b);
     });
@@ -909,6 +897,25 @@ var EXAMPLE5=[
    {re:/부사적 용법|목적/,ex:[
     ['She saved money to buy a new laptop.','그녀는 새 노트북을 사려고 돈을 모았다.','to buy a new laptop'],
     ['He went to the library to study for the exam.','그는 시험공부를 하러 도서관에 갔다.','to study for the exam']]},
+   {re:/병렬/,ex:[
+    ['She likes to read books and play the piano.','그녀는 책 읽기와 피아노 치기를 좋아한다.','read books and play the piano'],
+    ['The movie was long but exciting.','그 영화는 길었지만 흥미진진했다.','long but exciting']]},
+   {re:/less|no more/,ex:[
+    ['He is no more a genius than I am.','내가 천재가 아니듯 그도 천재가 아니다.','no more a genius than I am'],
+    ['The job is less about money than about passion.','그 일은 돈이라기보다 열정에 관한 것이다.','less about money than about passion']]},
+   {re:/명사절 주어/,ex:[
+    ['Whether he will come is not clear.','그가 올지 안 올지는 분명하지 않다.','Whether he will come'],
+    ['Where we are in life affects how we feel.','우리가 인생의 어디에 있는지가 우리의 기분에 영향을 준다.','Where we are in life']]},
+   {re:/동명사 주어/,ex:[
+    ['Reading books every day improves your vocabulary.','매일 책을 읽는 것은 어휘력을 높여 준다.','Reading books every day'],
+    ['Learning a new language takes time.','새로운 언어를 배우는 것은 시간이 걸린다.','Learning a new language']]},
+   {re:/전치사 \+ 동명사/,ex:[
+    ['She left without saying goodbye.','그녀는 작별 인사도 없이 떠났다.','without saying goodbye'],
+    ['He is good at solving puzzles.','그는 퍼즐 푸는 것을 잘한다.','at solving puzzles']]},
+   {re:/both A and B/,ex:[
+    ['Both my brother and my sister like music.','내 형과 내 누나 둘 다 음악을 좋아한다.','Both my brother and my sister']]},
+   {re:/so \+ 조동사/,ex:[
+    ['She plays the piano, and so does her sister.','그녀는 피아노를 치고, 그녀의 언니도 그렇다.','so does her sister']]},
    {re:/given/i,ex:[
     ['At any given moment, millions of people are online.','어느 순간에든 수백만 명이 온라인에 있다.','any given moment'],
     ['On a given day, the café serves two hundred customers.','특정한 하루에 그 카페는 200명의 손님을 받는다.','a given day']]}
@@ -1059,8 +1066,9 @@ var EXAMPLE5=[
     top.appendChild(t);app.appendChild(top);
     renderPassageView(app,p.sentences,p.draft?'초안입니다. 정답과 해설을 확인한 뒤 사용하세요.':p.sample?'선생님 기준 예시 해설입니다.':'');
     if(GUIDE.some(function(g){return g.no.indexOf(p.no)>=0})){
-      guideSection(app,p.no,p.no+'번 어법 복습','풀고 난 뒤 이 문제에 나온 어법을 복습하세요.');
-      var gb=btn('이 문제 어법 문제 풀러 가기','primary',function(){state.gNo=p.no+'번';go('gram')});
+      if(MERGE_NOS.indexOf(p.no)<0)guideSection(app,p.no,p.no+'번 어법 복습','풀고 난 뒤 이 문제에 나온 어법을 복습하세요.');
+      else{app.appendChild(mk('h2',null,p.no+'번 어법 복습'));app.appendChild(mk('p','lead','풀고 난 뒤 이 문제의 주요 어법과 기초 정리를 한곳에서 복습하세요.'))}
+      var gb=btn(MERGE_NOS.indexOf(p.no)>=0?p.no+'번 주요 어법 복습하러 가기':'이 문제 어법 문제 풀러 가기','primary',function(){state.gNo=p.no+'번';go('gram')});
       app.appendChild(gb);
     }
     wbList(app,vocabItems([p]),{title:'이 지문의 단어장'});
@@ -1336,35 +1344,65 @@ var EXAMPLE5=[
     pts:['less A than B = A라기보다 B. 강조점은 B.','no more A than B = B가 아니듯 A도 아니다.'],
     ex:[['The process of science is less about collecting pieces of knowledge than it is about reducing the uncertainties','과학의 과정은 지식 조각을 모으는 것이라기보다 불확실성을 줄이는 것이다','less about']]}
   ];
+  function guideBody(g){
+    var b=mk('div','gb');
+    if(g.pts){var ul=mk('ul');g.pts.forEach(function(x){ul.appendChild(mk('li',null,x))});b.appendChild(ul)}
+    if(g.table){
+      var tb=mk('table');
+      g.table.forEach(function(r,i){var tr=mk('tr');r.forEach(function(c){tr.appendChild(mk(i?'td':'th',null,c))});tb.appendChild(tr)});
+      b.appendChild(tb);
+    }
+    if(g.ex){
+      var ex=mk('div','exs');
+      g.ex.forEach(function(e){
+        var en=mk('div','e'),k=e[0].indexOf(e[2]);
+        if(k>=0){en.appendChild(document.createTextNode(e[0].slice(0,k)));en.appendChild(mk('b',null,e[2]));en.appendChild(document.createTextNode(e[0].slice(k+e[2].length)))}
+        else en.textContent=e[0];
+        ex.appendChild(en);ex.appendChild(mk('div','k',e[1]));
+      });
+      b.appendChild(ex);
+    }
+    if(g.tip)b.appendChild(mk('div','tip',g.tip));
+    return b;
+  }
+  function guideDetails(g,open){
+    var d=mk('details','gd');if(open)d.open=true;
+    d.appendChild(mk('summary',null,g.t.replace(/^[\d-]+\.\s*/,'')));
+    d.appendChild(guideBody(g));
+    return d;
+  }
   function guideSection(app,no,heading,lead){
     var list=GUIDE.filter(function(g){return !no||g.no.indexOf(no)>=0});
     if(!list.length)return;
     app.appendChild(mk('h2',null,heading));
     if(lead)app.appendChild(mk('p','lead',lead));
-    list.forEach(function(g){
-      var d=mk('details','gd');if(g.open&&!no)d.open=true;
-      d.appendChild(mk('summary',null,g.t.replace(/^[\d-]+\.\s*/,'')));
-      var b=mk('div','gb');
-      if(g.pts){var ul=mk('ul');g.pts.forEach(function(x){ul.appendChild(mk('li',null,x))});b.appendChild(ul)}
-      if(g.table){
-        var tb=mk('table');
-        g.table.forEach(function(r,i){var tr=mk('tr');r.forEach(function(c){tr.appendChild(mk(i?'td':'th',null,c))});tb.appendChild(tr)});
-        b.appendChild(tb);
-      }
-      if(g.ex){
-        var ex=mk('div','exs');
-        g.ex.forEach(function(e){
-          var en=mk('div','e'),k=e[0].indexOf(e[2]);
-          if(k>=0){en.appendChild(document.createTextNode(e[0].slice(0,k)));en.appendChild(mk('b',null,e[2]));en.appendChild(document.createTextNode(e[0].slice(k+e[2].length)))}
-          else en.textContent=e[0];
-          ex.appendChild(en);ex.appendChild(mk('div','k',e[1]));
-        });
-        b.appendChild(ex);
-      }
-      if(g.tip)b.appendChild(mk('div','tip',g.tip));
-      d.appendChild(b);app.appendChild(d);
-    });
+    list.forEach(function(g){app.appendChild(guideDetails(g,g.open&&!no))});
   }
+  /* 지문에 표시된 어법 한 항목에 해당하는 기초 정리 카드 */
+  function guideFor(it){
+    var lb=String(it.label||''),out=[];
+    function add(pre){var g=GUIDE.filter(function(x){return x.t.indexOf(pre)===0})[0];if(g&&out.indexOf(g)<0)out.push(g)}
+    if(/that 생략|관계대명사 생략|which 생략/.test(lb)){add('1. that');add('4. 생략')}
+    else if(/후치/.test(lb))add('4. 생략');
+    if(/Only|do \+ S/.test(lb))add('6. Only');
+    if(/관계대명사/.test(lb)&&!/생략/.test(lb)){add(/^what$/i.test(String(it.pt.phrase||''))?'2. what':'1. that');add('3-1.')}
+    if(/관계부사|의문부사/.test(lb)){add('3. 관계부사');add('3-1.')}
+    if(/분사구문/.test(lb))add('8. 분사구문');
+    if(/병렬/.test(lb))add('10. 병렬');
+    if(/가주어|진주어/.test(lb))add('7. 가주어');
+    if(/동격 that/.test(lb))add('1. that');
+    if(/be 생략|보어 생략/.test(lb))add('4. 생략');
+    if(/전치사 \+ 관계대명사/.test(lb))add('3. 관계부사');
+    if(/less|no more/.test(lb))add('11. 비교');
+    if(/수동 \+ to부정사|with \+ O|수동 동명사/.test(lb))add('동명사 주어');
+    if(/비교급.*비교급/.test(lb))add('9. the 비교급');
+    if(/명사절/.test(lb))add('명사절');
+    if(/동명사 주어|수동 동명사|전치사 \+ 동명사/.test(lb))add('동명사 주어');
+    if(/so \+/.test(lb))add('so + 동사');
+    if(it.pt.type==='연결어')add('5. 접속사');
+    return out;
+  }
+  var MERGE_NOS=[2,6,8,9,12];
 
   /* ---------- 화면: 누적 어법 ---------- */
   function viewGram(app){
@@ -1380,15 +1418,19 @@ var EXAMPLE5=[
     chips(np,'문제',nums,state.gNo,function(v){state.gNo=v;render()});
     app.appendChild(np);
     var gno=state.gNo==='전체'?0:parseInt(state.gNo,10);
-    guideSection(app,gno,gno?gno+'번 어법 기초 정리':'어법 기초 정리 (전체)');
-    app.appendChild(mk('h2',null,gno?gno+'번 지문에 표시된 어법':'지문에 표시된 어법'));
-    app.appendChild(mk('p','lead','지문에서 표시한 어법, 관계사, 연결어, 대명사가 설명과 함께 모입니다.'));
+    var merged=!gno||MERGE_NOS.indexOf(gno)>=0;
+    if(merged){
+      app.appendChild(mk('h2',null,gno?gno+'번 지문 주요 어법':'전체 지문 주요 어법'));
+      app.appendChild(mk('p','lead','지문에 표시된 어법마다 아래에 해당하는 어법 기초 정리가 함께 들어 있습니다. 제목을 눌러 펼치세요.'));
+    }else{
+      guideSection(app,gno,gno?gno+'번 어법 기초 정리':'어법 기초 정리 (전체)');
+      app.appendChild(mk('h2',null,gno?gno+'번 지문에 표시된 어법':'지문에 표시된 어법'));
+      app.appendChild(mk('p','lead','지문에서 표시한 어법, 관계사, 연결어, 대명사가 설명과 함께 모입니다.'));
+    }
     var qi=items.filter(function(x){return x.pt.type!=='대명사'&&x.label});
     if(qi.length>=3){
       app.appendChild(studyControls('gram',qi,function(row,get){
-        var seenS={},tq=qi.filter(function(x){if(!x.tr||seenS[x.s])return false;seenS[x.s]=1;return true});
-        if(tq.length)row.appendChild(btn('문장 해석 연습','primary',function(){var g=get();startQuiz('gram','translate',tq,g[0],g[1])}));
-        row.appendChild(btn('구문 이름 고르기 학습',null,function(){var g=get();startQuiz('gram','name',qi,g[0],g[1])}));
+        row.appendChild(btn('어법 연습','outline',function(){var g=get();startQuiz('gram','name',qi,g[0],g[1])}));
       }));
     }
     var fp=mk('section','panel');
@@ -1407,9 +1449,17 @@ var EXAMPLE5=[
       c.appendChild(markSentence(it.s,it.pt));
       if(it.pt.explanation)c.appendChild(mk('p','ex gx',it.pt.explanation));
       if(it.pt.meaning)c.appendChild(mk('p','ex','뜻: '+it.pt.meaning));
-      var sim=mk('div');
-      if(simOf(it)){var r=mk('div','row');r.appendChild(btn('비슷한 예문 보기',null,function(){showSimilar(it,sim)}));c.appendChild(r)}
-      c.appendChild(sim);app.appendChild(c);
+      if(it.label&&it.pt.type!=='대명사'){
+        var pr=mk('div','row');
+        pr.appendChild(btn('이 어법 연습','outline',function(){
+          var same=qi.filter(function(x){return x!==it&&x.label===it.label});
+          state.quiz={kind:'gram',mode:'name',pool:qi,list:[it].concat(shuffle(same)),i:0,ok:0,wrong:[],done:false,tr:null};
+          render();
+        }));
+        c.appendChild(pr);
+      }
+      if(merged)guideFor(it).forEach(function(g){c.appendChild(guideDetails(g))});
+      app.appendChild(c);
     });
   }
 
