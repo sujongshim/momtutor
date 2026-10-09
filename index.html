@@ -1141,17 +1141,19 @@ var EXAMPLE5=[
       var d=[];shuffle(pool.slice()).forEach(function(m){if(m!==it.m&&d.indexOf(m)<0&&d.length<3)d.push(m)});
       return {it:it,opts:shuffle([it.m].concat(d))};
     });
-    state.exam={r:r,name:name,qs:qs,i:0,ok:0,wrong:[],done:false,sent:'idle'};
+    var attempt=((examStats()[r.label]||{}).n||0)+1;
+    state.exam={r:r,name:name,qs:qs,i:0,ok:0,wrong:[],done:false,sent:'idle',attempt:attempt};
     render();
   }
   function sendExam(ex){
     ex.sent='sending';
-    var body=JSON.stringify({name:ex.name,round:ex.r.label,range:ex.r.range,score:ex.ok,total:ex.qs.length,wrong:ex.wrong.map(function(w){return w.h})});
+    var body=JSON.stringify({name:ex.name,round:ex.r.label,range:ex.r.range+' · '+ex.attempt+'번째 응시',score:ex.ok,total:ex.qs.length,wrong:ex.wrong.map(function(w){return w.h})});
     fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:body})
       .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
       .then(function(x){ex.sent=(x.j&&x.j.ok)?'ok':(x.s===503?'noconfig':'fail');if(state.exam===ex)render()})
       .catch(function(){ex.sent='fail';if(state.exam===ex)render()});
   }
+  function examStats(){try{return JSON.parse(localStorage.getItem('momtutor_exam_stats')||'{}')}catch(e){return {}}}
   function examHistory(){try{return JSON.parse(localStorage.getItem('momtutor_exams')||'[]')}catch(e){return []}}
   function vExam(app){
     var rounds=examRounds(),nm='';
@@ -1168,7 +1170,9 @@ var EXAMPLE5=[
       var c=mk('div','gc'),h=mk('div','row');
       h.appendChild(mk('b',null,r.label));h.appendChild(mk('span','src2',r.range+' · 단어 '+r.items.length+'개'));
       c.appendChild(h);
-      c.appendChild(btn('시험 보기','outline',function(){
+      var stx=examStats()[r.label];
+      if(stx&&stx.n)c.appendChild(mk('p','rec','응시 '+stx.n+'회 · 최고 '+stx.best+' / '+(stx.total||r.items.length)));
+      c.appendChild(btn(stx&&stx.n?'다시 시험 보기':'시험 보기','outline',function(){
         var v=inp.value.trim();
         if(!v){state.msg='이름을 먼저 적어 주세요.';render();return}
         state.msg='';try{localStorage.setItem('momtutor_name',v)}catch(e){}
@@ -1190,7 +1194,7 @@ var EXAMPLE5=[
     var ex=state.exam,panel=mk('section','panel');
     if(ex.done){
       var total=ex.qs.length,pct=Math.round(ex.ok/total*100);
-      panel.appendChild(mk('h2',null,ex.r.label+' 시험 결과'));
+      panel.appendChild(mk('h2',null,ex.r.label+' '+ex.attempt+'번째 시험 결과'));
       var stat=mk('div','stat');
       [['점수',ex.ok+' / '+total],['정답률',pct+'%'],['이름',ex.name]].forEach(function(x){var d=mk('div');d.appendChild(mk('span',null,x[0]));d.appendChild(mk('b',null,x[1]));stat.appendChild(d)});
       panel.appendChild(stat);
@@ -1208,12 +1212,13 @@ var EXAMPLE5=[
         state.exam=null;state.vs=null;state.vtab='words';
         render();
       }));
+      r2.appendChild(btn('같은 회차 다시 보기','outline',function(){startExam(ex.r,ex.name)}));
       r2.appendChild(btn('끝내기',null,function(){state.exam=null;render()}));
       panel.appendChild(r2);app.appendChild(panel);return;
     }
     var q=ex.qs[ex.i];
     var top=mk('div','bar');
-    top.appendChild(mk('span','cnt',ex.r.label+' · '+(ex.i+1)+' / '+ex.qs.length));
+    top.appendChild(mk('span','cnt',ex.r.label+' '+ex.attempt+'번째 · '+(ex.i+1)+' / '+ex.qs.length));
     top.appendChild(btn('그만하기',null,function(){state.exam=null;render()}));
     panel.appendChild(top);
     var pg=mk('div','prog'),bar=mk('i');bar.style.width=(ex.i/ex.qs.length*100)+'%';pg.appendChild(bar);panel.appendChild(pg);
@@ -1227,7 +1232,8 @@ var EXAMPLE5=[
         ex.i++;
         if(ex.i>=ex.qs.length){
           ex.done=true;
-          try{var h=examHistory();h.push({t:Date.now(),round:ex.r.label,score:ex.ok,total:ex.qs.length});localStorage.setItem('momtutor_exams',JSON.stringify(h.slice(-30)))}catch(e){}
+          try{var stt=examStats(),cur=stt[ex.r.label]||{n:0,best:0};cur.n=ex.attempt;cur.best=Math.max(cur.best||0,ex.ok);cur.total=ex.qs.length;stt[ex.r.label]=cur;localStorage.setItem('momtutor_exam_stats',JSON.stringify(stt));
+            var h=examHistory();h.push({t:Date.now(),round:ex.r.label+' '+ex.attempt+'번째',score:ex.ok,total:ex.qs.length});localStorage.setItem('momtutor_exams',JSON.stringify(h.slice(-30)))}catch(e){}
           sendExam(ex);
         }
         render();
