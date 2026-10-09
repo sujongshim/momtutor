@@ -1461,7 +1461,7 @@ var EXAMPLE5=[
       if(it.pt.meaning)c.appendChild(mk('p','ex','뜻: '+it.pt.meaning));
       if(it.label&&it.pt.type!=='대명사'){
         var pr=mk('div','row');
-        pr.appendChild(btn('이 어법 연습','outline',function(){
+        pr.appendChild(btn('어법 연습','outline',function(){
           var same=qi.filter(function(x){return x!==it&&x.label===it.label});
           state.quiz={kind:'gram',mode:'name',pool:qi,list:[it].concat(shuffle(same)),i:0,ok:0,wrong:[],done:false,tr:null};
           render();
