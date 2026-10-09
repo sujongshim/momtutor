@@ -200,7 +200,9 @@ button:disabled{opacity:.55;cursor:default}
    {text:`The science we learn in grade school is a collection of certainties about the natural world — the earth goes around the sun, DNA carries the information of an organism, and so on.`,
     translation:`초등학교에서 배우는 과학은 자연계에 대한 확실한 사실의 모음이다. 지구가 태양 주위를 돌고, DNA가 생물의 정보를 담고 있다는 것 등이다.`,
     points:[
-     {label:`that 생략`,phrase:`science we learn`,at:`science`,type:`어법`,explanation:`science와 we 사이에 목적격 관계대명사(that/which) 생략. learn의 목적어가 선행사 science.`}]},
+     {label:`that 생략`,phrase:`science we learn`,at:`science`,type:`어법`,explanation:`science와 we 사이에 목적격 관계대명사(that/which) 생략. learn의 목적어가 선행사 science.`},
+     {label:``,phrase:`certainties`,type:`어휘`,entry:`certainty`,meaning:`확실성, 확실한 사실`,explanation:`certain(확실한)의 명사형. a collection of certainties = 확실한 사실의 모음.`},
+     {label:``,phrase:`organism`,type:`어휘`,entry:`organism`,meaning:`유기체, 생물`,explanation:`생물 하나하나를 가리킴. DNA carries the information of an organism.`}]},
    {text:`Only when you start to learn the practice of science do you realize that each of these "facts" was hard won through a succession of logical inferences based upon many observations or experiments.`,
     translation:`과학의 실제 과정을 배우기 시작해야 비로소, 이 "사실"들 하나하나가 수많은 관찰이나 실험에 근거한 논리적 추론이 이어진 끝에 어렵게 얻어졌음을 깨닫게 된다.`,
     points:[
@@ -209,6 +211,7 @@ button:disabled{opacity:.55;cursor:default}
      {label:`these = 과학적 사실`,phrase:`these`,type:`대명사`,explanation:`these = 앞 문장의 과학적 사실들(지구가 태양 주위를 돎, DNA 등).`},
      {label:`수동`,phrase:`was hard won`,type:`어법`,explanation:`hard는 부사, won은 win의 p.p. 수동태, "힘들게 얻어졌다".`},
      {label:``,phrase:`a succession of`,type:`어휘`,entry:`a succession of ~`,meaning:`일련의 ~, 잇따른 ~`,explanation:`succession = 연속.`},
+     {label:``,phrase:`inferences`,type:`어휘`,entry:`inference`,meaning:`추론`,explanation:`infer(추론하다)의 명사. logical inferences = 논리적 추론.`},
      {label:``,phrase:`based upon`,type:`어휘`,entry:`based upon ~`,meaning:`~에 근거한, ~에 기초한`,explanation:`be based on/upon = ~에 근거하다. 여기서는 (which are) based upon ~ 형태로 inferences를 꾸밈.`},
      {label:`후치 수식`,phrase:`many observations or experiments`,type:`어법`,explanation:`based upon 이하는 과거분사구, inferences 후치 수식. (which are) 생략. upon의 목적어가 observations or experiments(병렬).`}]},
    {key:true,text:`The process of science is less about collecting pieces of knowledge than it is about reducing the uncertainties in what we know.`,
@@ -217,17 +220,19 @@ button:disabled{opacity:.55;cursor:default}
      {label:``,phrase:`less about`,type:`어휘`,entry:`less about A than B`,meaning:`A라기보다 B`,explanation:`less about A than B = A라기보다 B. A: collecting ~, B: reducing ~. 강조점은 B.`},
      {label:``,phrase:`than`,type:`어휘`,nowb:true,explanation:`less about A than B의 than. than 뒤가 B.`},
      {label:`it = process`,phrase:`it`,ctx:`than it is`,type:`대명사`,explanation:`it = The process of science.`},
+     {label:``,phrase:`reducing`,type:`어휘`,entry:`reduce`,meaning:`줄이다, 감소시키다`,explanation:`reducing the uncertainties = 불확실성을 줄이는 것. about의 목적어(동명사).`},
      {label:`관계대명사`,phrase:`what`,ctx:`what we know`,type:`관계사`,explanation:`what = the thing that. in의 목적어 명사절. 관계대명사 뒤는 불완전한 문장(know의 목적어 없음).`}]},
    {text:`Our uncertainties can be greater or lesser for any given piece of knowledge depending upon where we are in that process — today we are quite certain of how an apple will fall from a tree, but our understanding of the turbulent fluid flow remains a work in progress after more than a century of effort.`,
     translation:`우리의 불확실성은 그 과정의 어디에 있느냐에 따라 지식 하나하나마다 더 클 수도, 더 작을 수도 있다. 오늘날 우리는 사과가 나무에서 어떻게 떨어지는지는 꽤 확실히 알지만, 난류 유동에 대한 이해는 한 세기 넘는 노력 뒤에도 여전히 진행 중이다.`,
     points:[
      {label:`병렬`,phrase:`greater or lesser`,type:`병렬`,explanation:`greater와 lesser 병렬(둘 다 형용사).`},
      {label:`given 형용사`,phrase:`any given piece of knowledge`,type:`어법`,explanation:`given = 주어진, 어떤 특정한. 과거분사의 형용사 용법.`},
-     {label:`분사구문`,phrase:`depending upon`,type:`어법`,explanation:`분사구문, ~에 따라. upon의 목적어는 where절.`},
+     {label:`분사구문`,phrase:`depending upon`,type:`어법`,vocab:true,entry:`depend upon ~`,meaning:`~에 달려 있다, ~에 따라`,explanation:`분사구문, ~에 따라. upon의 목적어는 where절.`},
      {label:`의문부사`,phrase:`where`,ctx:`where we are`,type:`관계사`,explanation:`where = 의문부사. upon의 목적어 명사절. 관계부사 뒤는 완전한 문장(we are in that process).`},
      {label:`의문부사`,phrase:`how`,ctx:`how an apple`,type:`관계사`,explanation:`how 의문사절, of의 목적어. 어순 how + S + V. 관계부사 뒤는 완전한 문장.`},
      {label:`역접`,phrase:`but`,type:`연결어`,explanation:`but = 역접. 앞 절과 대조(이미 아는 것 ↔ 아직 연구 중).`},
-     {label:``,phrase:`more than a century of`,type:`어휘`,entry:`more than ~`,meaning:`~ 이상, ~가 넘는`,explanation:`more than + 수량.`}]}
+     {label:``,phrase:`more than a century of`,type:`어휘`,entry:`more than ~`,meaning:`~ 이상, ~가 넘는`,explanation:`more than + 수량.`},
+     {label:``,phrase:`turbulent`,type:`어휘`,entry:`turbulent`,meaning:`난류의, 격동의`,explanation:`turbulent fluid flow = 난류 유동(불규칙하게 소용돌이치는 흐름).`}]}
   ];
 
   var EXAMPLE2=[
@@ -237,8 +242,9 @@ button:disabled{opacity:.55;cursor:default}
      {label:`후치 수식`,phrase:`born in a time`,type:`어법`,explanation:`과거분사구, species 후치 수식. (which was) born 생략.`},
      {label:`관계부사`,phrase:`when`,ctx:`a time when`,type:`관계사`,explanation:`when = in which. a time 수식 관계부사절. 관계부사 뒤는 완전한 문장.`},
      {label:``,phrase:`tendency to`,type:`어휘`,entry:`tendency to ~`,meaning:`~하는 경향`,explanation:`to부정사(형용사적 용법)가 tendency 수식.`},
+     {label:``,phrase:`plenty`,type:`어휘`,entry:`plenty`,meaning:`풍부한, 많은`,explanation:`resources are plenty = 자원이 풍부하다. 반대말 few(거의 없는).`},
      {label:`병렬`,phrase:`share and cooperate`,type:`병렬`,explanation:`share와 cooperate 병렬(to 뒤 동사원형 둘).`},
-     {label:`①`,phrase:`complicated`,type:`보기`,meaning:`복잡한`,explanation:`부적절. 다음 문장에서 less → more open to sharing. 자원이 풍부하면 나눔 성향이 약해지는 흐름과 반대.`}]},
+     {label:`①`,phrase:`complicated`,type:`보기`,vocab:true,meaning:`복잡한`,explanation:`부적절. 다음 문장에서 less → more open to sharing. 자원이 풍부하면 나눔 성향이 약해지는 흐름과 반대.`}]},
    {key:true,text:`When we have less, we tend to be more open to sharing what we have.`,
     translation:`가진 것이 적을 때, 우리는 가진 것을 나누는 데 더 열려 있는 경향이 있다.`,
     points:[
@@ -249,6 +255,7 @@ button:disabled{opacity:.55;cursor:default}
     translation:`어떤 유목 부족들은 가진 것이 많지 않지만, 그렇게 하는 것이 자신들에게 이익이 되기 때문에 기꺼이 나눈다.`,
     points:[
      {label:``,phrase:`nomadic`,type:`어휘`,meaning:`유목의`,explanation:`형용사. tribes 수식.`},
+     {label:``,phrase:`Certain`,type:`어휘`,entry:`certain ~`,meaning:`어떤, 일부의`,explanation:`Certain + 복수명사 = 어떤 ~들. 뒤에 오는 certain(확실한)과 뜻이 다릅니다.`},
      {label:`역접`,phrase:`yet`,type:`연결어`,explanation:`yet = 역접(그러나). 많지 않지만 기꺼이 나눔.`},
      {label:`이유`,phrase:`because`,ctx:`because it is`,type:`연결어`,explanation:`because = 이유. ~ 때문에.`},
      {label:`it = 가주어`,phrase:`it`,ctx:`because it is`,type:`대명사`,explanation:`it = 가주어. 진주어는 to do so.`},
@@ -266,7 +273,7 @@ button:disabled{opacity:.55;cursor:default}
     points:[
      {label:``,phrase:`not just because`,type:`어휘`,entry:`not just because A; it's because B`,meaning:`A 때문만이 아니라 B 때문이다`,explanation:`B가 진짜 이유.`},
      {label:``,phrase:`it's because`,type:`어휘`,nowb:true,explanation:`not just because와 짝.`},
-     {label:`③`,phrase:`survival`,type:`보기`,meaning:`생존`,explanation:`적절. 생존이 나눔에 달려 있음.`},
+     {label:`③`,phrase:`survival`,type:`보기`,vocab:true,meaning:`생존`,explanation:`적절. 생존이 나눔에 달려 있음.`},
      {label:`이유`,phrase:`for`,ctx:`for they know`,type:`연결어`,explanation:`for = because(접속사). 앞 내용의 이유 보충.`},
      {label:``,phrase:`in need of`,type:`어휘`,entry:`in need of`,meaning:`~이 필요한`,explanation:`the travelers 후치 수식.`}]},
    {text:`Ironically, the more we have, the bigger our fences, the more sophisticated our security to keep people away and the less we want to share.`,
@@ -275,13 +282,16 @@ button:disabled{opacity:.55;cursor:default}
      {label:`④ the 비교급 ~, the 비교급 ~`,phrase:`the more`,ctx:`the more we have`,type:`어법`,explanation:`the + 비교급 ~, the + 비교급 ~ = ~할수록 더 ~. 적절.`},
      {label:`병렬`,phrase:`the bigger`,type:`병렬`,explanation:`같은 구문 병렬. the bigger our fences (are).`},
      {label:`병렬`,phrase:`the more`,ctx:`the more sophisticated`,type:`병렬`,explanation:`같은 구문 병렬. our security (is) 생략.`},
+     {label:``,phrase:`sophisticated`,type:`어휘`,entry:`sophisticated`,meaning:`정교한, 세련된`,explanation:`the more sophisticated our security = 보안이 더 정교해진다.`},
      {label:`부사적 용법(목적)`,phrase:`to keep people away`,type:`어법`,explanation:`to부정사의 부사적 용법(목적).`},
      {label:`병렬`,phrase:`the less`,type:`병렬`,explanation:`같은 구문 병렬. the less we want to share.`}]},
    {text:`Our desire for more, combined with our increased physical interaction with the "common folk," starts to create a disconnection or blindness to reality.`,
     translation:`더 많이 가지려는 욕망은, "평범한 사람들"과의 접촉이 늘어난 것과 결합되어, 현실과의 단절이나 현실에 대한 무감각을 낳기 시작한다.`,
     points:[
      {label:`분사구문(수동)`,phrase:`combined with`,type:`어법`,explanation:`삽입된 분사구문(수동). = which is combined with.`},
-     {label:`⑤`,phrase:`increased`,type:`보기`,meaning:`증가한, 늘어난`,explanation:`적절. 늘어난 접촉.`},
+     {label:`⑤`,phrase:`increased`,type:`보기`,vocab:true,meaning:`증가한, 늘어난`,explanation:`적절. 늘어난 접촉.`},
+     {label:``,phrase:`interaction`,type:`어휘`,entry:`interaction`,meaning:`상호작용, 접촉`,explanation:`increased physical interaction = 늘어난 직접적 접촉.`},
+     {label:``,phrase:`disconnection`,type:`어휘`,entry:`disconnection`,meaning:`단절, 분리`,explanation:`dis(반대) + connection(연결) = 단절. disconnection or blindness = 단절이나 무감각.`},
      {label:``,phrase:`blindness to`,type:`어휘`,entry:`blindness to ~`,meaning:`~에 대한 무감각, ~을 보지 못함`,explanation:`to는 전치사, 뒤에 목적어.`}]}
   ];
 var EXAMPLE3=[
@@ -629,7 +639,7 @@ var EXAMPLE5=[
   function vocabItems(plist){
     var items=[],seen={};
     plist.forEach(function(p){(p.sentences||[]).forEach(function(s){(Array.isArray(s.points)?s.points:[]).forEach(function(pt){
-      if(pt.type!=='어휘'||pt.nowb)return;
+      if((pt.type!=='어휘'&&!pt.vocab)||pt.nowb)return;
       var h=String(pt.entry||pt.phrase||''),k=h.toLowerCase();
       if(!h||seen[k])return;seen[k]=1;
       items.push({k:k,h:h,m:String(pt.meaning||pt.explanation||''),s:String(s.text||''),p:String(pt.phrase||''),pid:p.id,src:pname(p)});
