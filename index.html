@@ -650,7 +650,7 @@ var EXAMPLE5=[
       }
       var m=pt;
       if(gk){m={};for(var kk in pt)m[kk]=pt[kk];m.parts=[pt]}
-      items.push({k:p.id+'|'+pt.phrase+'|'+(pt.ctx||''),gk:gk,pt:m,s:String(s.text||''),pid:p.id,src:pname(p),label:cleanLabel(pt.label)});
+      items.push({k:p.id+'|'+pt.phrase+'|'+(pt.ctx||''),gk:gk,pt:m,s:String(s.text||''),pid:p.id,src:pname(p),tr:String(s.translation||''),label:cleanLabel(pt.label)});
     })})});
     return items;
   }
@@ -771,6 +771,50 @@ var EXAMPLE5=[
     var opts=shuffle([correct].concat(shuffle(d).slice(0,3)));
     return {stem:stem,correct:correct,options:opts,note:note};
   }
+  /* ---------- 문장 해석 연습 ---------- */
+  function viewTranslate(parent,quiz){
+    var panel=mk('section','panel'),item=quiz.list[quiz.i];
+    var top=mk('div','bar');
+    top.appendChild(mk('span','cnt',(quiz.i+1)+' / '+quiz.list.length));
+    top.appendChild(btn('그만하기',null,function(){state.quiz=null;render()}));
+    panel.appendChild(top);
+    var pg=mk('div','prog'),bar=mk('i');bar.style.width=(quiz.i/quiz.list.length*100)+'%';pg.appendChild(bar);panel.appendChild(pg);
+    var box=mk('div','qbox');
+    box.appendChild(mk('p','status','우리말로 해석해 보세요. 색으로 표시된 부분이 이번에 연습할 어법입니다. ('+item.src+')'));
+    box.appendChild(markSentence(item.s,item.pt));
+    var ta=mk('textarea');ta.rows=3;ta.placeholder='내 해석을 적어 보세요 (적지 않아도 됩니다)';ta.style.minHeight='80px';ta.style.fontFamily='var(--sans)';ta.style.fontSize='.95rem';
+    box.appendChild(ta);
+    var fb=mk('div'),row=mk('div','row');
+    var hintBox=mk('div'),hb=btn('어법 힌트 보기',null,function(){
+      hb.disabled=true;
+      hintBox.className='fb';
+      hintBox.appendChild(mk('b',null,(item.label||'어법')+' '));
+      hintBox.appendChild(document.createTextNode(item.pt.explanation||''));
+    });
+    var sb=btn('정답 해석 보기','primary',function(){
+      sb.disabled=true;hb.disabled=true;ta.disabled=true;
+      fb.className='fb';
+      fb.appendChild(mk('b',null,'모범 해석'));
+      fb.appendChild(mk('p',null,item.tr||'(해석이 등록되지 않은 문장입니다)'));
+      if(!hintBox.firstChild){fb.appendChild(mk('b',null,(item.label||'어법')+' '));fb.appendChild(document.createTextNode(item.pt.explanation||''))}
+      fb.appendChild(mk('p','status','내 해석과 비교해 보고, 아래에서 스스로 체크하세요.'));
+      var gr=mk('div','gr');
+      function done(ok){
+        if(ok)quiz.ok++;else quiz.wrong.push(item);
+        updateRec('gram',item.k,ok,item.pid);
+        quiz.i++;
+        if(quiz.i>=quiz.list.length){quiz.done=true;var st=load();st.log.push({t:Date.now(),k:'gram',n:quiz.list.length,ok:quiz.ok});st.log=st.log.slice(-30);save()}
+        render();
+      }
+      gr.appendChild(btn('잘 해석했어요','okb',function(){done(true)}));
+      gr.appendChild(btn('다시 볼래요','no',function(){done(false)}));
+      fb.appendChild(gr);
+    });
+    row.appendChild(sb);row.appendChild(hb);
+    box.appendChild(row);box.appendChild(hintBox);box.appendChild(fb);
+    panel.appendChild(box);parent.appendChild(panel);
+  }
+
   function viewQuiz(parent){
     var quiz=state.quiz,panel=mk('section','panel');
     if(quiz.done){
@@ -796,6 +840,7 @@ var EXAMPLE5=[
       row.appendChild(btn('끝내기',null,function(){state.quiz=null;render()}));
       panel.appendChild(row);parent.appendChild(panel);return;
     }
+    if(quiz.mode==='translate'){viewTranslate(parent,quiz);return}
     var item=quiz.list[quiz.i],q=buildQuestion(quiz,item);
     var top=mk('div','bar');
     top.appendChild(mk('span','cnt',(quiz.i+1)+' / '+quiz.list.length));
@@ -1341,7 +1386,9 @@ var EXAMPLE5=[
     var qi=items.filter(function(x){return x.pt.type!=='대명사'&&x.label});
     if(qi.length>=3){
       app.appendChild(studyControls('gram',qi,function(row,get){
-        row.appendChild(btn('구문 이름 고르기 학습','primary',function(){var g=get();startQuiz('gram','name',qi,g[0],g[1])}));
+        var seenS={},tq=qi.filter(function(x){if(!x.tr||seenS[x.s])return false;seenS[x.s]=1;return true});
+        if(tq.length)row.appendChild(btn('문장 해석 연습','primary',function(){var g=get();startQuiz('gram','translate',tq,g[0],g[1])}));
+        row.appendChild(btn('구문 이름 고르기 학습',null,function(){var g=get();startQuiz('gram','name',qi,g[0],g[1])}));
       }));
     }
     var fp=mk('section','panel');
