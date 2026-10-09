@@ -494,7 +494,7 @@ var EXAMPLE5=[
     {id:'b1-8',book:'1회',no:8,qtype:'빈칸',origin:'2025년 9월 31번',sample:true,draft:true,sentences:EXAMPLE5},
     {id:'b1-9',book:'1회',no:9,qtype:'무관한 문장',origin:'2023년 11월 35번',sample:true,draft:true,sentences:EXAMPLE4},
     {id:'b1-11',book:'1회',no:12,qtype:'제목·어휘',origin:'2025년 3월 41~42번',sample:true,draft:true,sentences:EXAMPLE3}];
-  var state={vtab:'today',vf:'전체',vq:'',vs:null,view:'list',pid:null,db:null,user:null,canWrite:false,dbList:[],fBook:'전체',fType:'전체',gType:'전체',scope:'all',count:'10',quiz:null,showAdd:false};
+  var state={vtab:'today',vf:'전체',vq:'',vs:null,view:'list',pid:null,db:null,user:null,canWrite:false,dbList:[],fBook:'전체',fType:'전체',gType:'전체',gNo:'전체',scope:'all',count:'10',quiz:null,showAdd:false};
   function allPassages(){
     var m={};BUILTIN.concat(state.dbList).forEach(function(p){m[p.id]=p});
     return Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){
@@ -1012,6 +1012,11 @@ var EXAMPLE5=[
     var t=mk('div');t.appendChild(mk('h2',null,pname(p)+' · '+p.qtype));if(p.origin)t.appendChild(mk('span','src2',p.origin));
     top.appendChild(t);app.appendChild(top);
     renderPassageView(app,p.sentences,p.draft?'초안입니다. 정답과 해설을 확인한 뒤 사용하세요.':p.sample?'선생님 기준 예시 해설입니다.':'');
+    if(GUIDE.some(function(g){return g.no.indexOf(p.no)>=0})){
+      guideSection(app,p.no,p.no+'번 어법 복습','풀고 난 뒤 이 문제에 나온 어법을 복습하세요.');
+      var gb=btn('이 문제 어법 문제 풀러 가기','primary',function(){state.gNo=p.no+'번';go('gram')});
+      app.appendChild(gb);
+    }
     wbList(app,vocabItems([p]),{title:'이 지문의 단어장'});
   }
 
@@ -1233,55 +1238,66 @@ var EXAMPLE5=[
 
   /* ---------- 어법 기초 정리(필기 노트 기반) ---------- */
   var GUIDE=[
-   {t:'0. 먼저 알아둘 말',open:true,
+   {no:[2,6,8,9,12],t:'0. 먼저 알아둘 말',open:true,
     pts:['주어(S) = ~은/는/이/가, 동사(V) = 움직임·상태, 목적어(O) = ~을/를, 보어(C) = 주어·목적어를 설명하는 말.','완전한 문장 = 꼭 필요한 성분이 다 있는 문장. 예: we are in that process (주어 we + 동사 are + 장소 in that process).','불완전한 문장 = 주어나 목적어 같은 꼭 필요한 성분이 하나 빠진 문장. 예: ( ) may change (주어가 없음), we know ( ) (know의 목적어가 없음).','선행사 = 관계사 바로 앞에서 꾸밈을 받는 명사. 예: a time when ~ 에서 a time.'],
     tip:'어법 문제의 절반은 "뒤가 완전한가, 불완전한가?"를 보는 일입니다.'},
-   {t:'1. that 구별: 접속사 vs 관계대명사',
+   {no:[2,6,9],t:'1. that 구별: 접속사 vs 관계대명사',
     pts:['that 뒤가 완전한 문장 → 접속사 that (~라는 것). 명사절을 만들거나 앞 명사와 동격이 됩니다.','that 뒤가 불완전한 문장(주어나 목적어가 빠짐) → 관계대명사 that. 앞 명사(선행사)를 꾸미고, who/which 대신 쓸 수 있습니다.','관계대명사 종류: who(사람), which(사물), whom(사람, 목적격), that(둘 다), whose(~의). 뒤는 모두 불완전한 문장.','순서: ① that 앞에 꾸밀 명사가 있나? ② that 뒤에서 주어/목적어가 빠졌나? 빠졌으면 관계대명사, 아니면 접속사.'],
     ex:[['for they know that they may be the travelers in need of food','왜냐하면 그들은 자신들이 ~ 여행자가 될 수도 있음을 알기 때문이다.','that they may be'],['situations that may change unexpectedly','예기치 않게 바뀔 수 있는 상황','that may change'],['the chances that drivers will cause accidents','운전자가 사고를 일으킬 가능성','that drivers will cause']],
     tip:'첫째: that 뒤 "they may be ~"는 주어가 있어 완전 → 접속사. 둘째: that 뒤 "may change ~"는 주어가 없어 불완전 → 관계대명사. 셋째: chances와 that절이 같은 내용(동격)이고 뒤가 완전 → 동격 접속사.'},
-   {t:'2. what: 선행사를 품은 관계대명사',
+   {no:[2,6,8],t:'2. what: 선행사를 품은 관계대명사',
     pts:['what = the thing(s) that (~하는 것). 앞에 선행사가 없고, 뒤는 불완전한 문장.','what절은 명사절이라 주어·목적어·보어 자리에 옵니다.','that/which는 앞에 명사가 있고, what은 앞에 명사가 없다고 기억하세요.'],
     ex:[['we tend to be more open to sharing what we have','우리는 가진 것을 나누는 데 더 열려 있다','what we have'],['reducing the uncertainties in what we know','우리가 아는 것의 불확실성을 줄이는','what we know']]},
-   {t:'3. 관계부사 where / when / how / why',
+   {no:[2,6,9,12],t:'3. 관계부사 where / when / how / why',
     pts:['관계부사 + 완전한 문장. (관계대명사 + 불완전한 문장과 정반대)','선행사: where = the place, when = the time, why = the reason, how = the way.','how와 the way는 둘 중 하나만 씁니다(the way how 금지).','전치사 + 관계대명사(in which 등)도 뒤가 완전하므로 관계부사와 같은 자리입니다.','where/how가 "어디에/어떻게"라는 의문 뜻이면 의문부사입니다. 이 경우도 뒤가 완전한 문장(S+V)입니다.'],
     ex:[['a time when resources were limited and dangers were great','자원이 한정되고 위험이 컸던 시대','when resources were limited'],['depending upon where we are in that process','우리가 그 과정의 어디에 있느냐에 따라','where we are'],['how an apple will fall from a tree','사과가 나무에서 어떻게 떨어지는지','how an apple will fall']]},
-   {t:'3-1. 관계대명사 vs 관계부사 vs 접속사 that 한눈에',
+   {no:[2,6,9,12],t:'3-1. 관계대명사 vs 관계부사 vs 접속사 that 한눈에',
     table:[['종류','예','뒤에 오는 문장'],['관계대명사','who, which, that, what, whom','불완전'],['관계부사','where, when, why, how','완전'],['접속사 that','that (~라는 것)','완전']],
     tip:'that/which/where 중 고르는 문제: 뒤에서 주어나 목적어가 빠졌으면 which/that, 다 있으면 where/when.'},
-   {t:'4. 생략 3가지: 목적격 관계대명사, 관계대명사+be, 접속사 that',
+   {no:[2,8,12],t:'명사절: whether / 의문사 / how',
+    pts:['whether(~인지 아닌지), 의문사(what, who, where, how ...)가 이끄는 절은 명사절이라 문장에서 주어·목적어 자리에 옵니다.','명사절이 주어이면 단수 취급, 동사는 단수형(is, depends).','의문사절 어순은 의문사 + 주어 + 동사 (how an apple will fall). 의문문 어순(how will an apple fall)이 아닙니다.'],
+    ex:[['Whether we feel happy or sad, content or discontent, is not determined merely by each moment','행복한지 슬픈지는 각 순간만으로 결정되지 않는다','Whether we feel happy or sad'],['whether they can continue with their education, where, and at what cost depends importantly on a handful of numbers','교육을 계속할 수 있는지, 어디서, 어떤 비용으로 하는지는 소수의 숫자에 좌우된다','depends']]},
+   {no:[2,6,8,12],t:'4. 생략 3가지: 목적격 관계대명사, 관계대명사+be, 접속사 that',
     pts:['목적격 관계대명사(that/which) 생략: 명사 + 주어 + 동사 모양이 보이면 사이에 관계대명사가 생략된 것입니다.','주격 관계대명사 + be동사 생략: 명사 뒤에 분사(-ing / p.p.)나 전치사구가 바로 오면 (who/which + be)가 생략된 것입니다. 이것이 분사의 후치 수식입니다.','접속사 that 생략: think, know, say, realize 등 뒤에 주어 + 동사가 바로 오면 that이 생략된 것입니다.'],
     ex:[['The science we learn in grade school','초등학교에서 배우는 과학','science we learn'],['a species born in a time','한 시대에 태어난 종','born in a time'],['inferences based upon many observations','많은 관찰에 근거한 추론','based upon many observations'],['They think numbers represent the most neutral language','그들은 숫자가 가장 중립적인 언어라고 생각한다','think numbers represent']]},
-   {t:'5. 접속사 vs 전치사',
+   {no:[2,6,8,9,12],t:'5. 접속사 vs 전치사',
     pts:['접속사 뒤에는 절(주어 + 동사), 전치사 뒤에는 명사(구)나 동명사가 옵니다.','because + 절, because of + 명사. while + 절, during + 명사. although + 절, despite + 명사.','등위접속사 and, but, or, yet, for는 앞뒤를 같은 형태로 잇습니다. for는 문장 중간에서 "왜냐하면"(= because)입니다.','when, if, while, because는 부사절을 이끄는 접속사이므로 뒤에 S + V가 옵니다.'],
     ex:[['they are happy to share because it is in their interest','그것이 자신들에게 이익이 되기 때문에 기꺼이 나눈다','because it is'],['you may have beginner\'s luck after betting on 7','7에 돈을 건 뒤에 초심자의 행운을 얻을 수도 있다','after betting']]},
-   {t:'6. Only + 부사(구/절) 도치: be·조동사 vs 일반동사',
+   {no:[2],t:'6. Only + 부사(구/절) 도치: be·조동사 vs 일반동사',
     pts:['Only + 부사(구/절)가 문장 맨 앞에 오면, 뒤는 의문문 어순(도치)이 됩니다: Only + 부사 + 조동사/be + 주어 + 동사.','① be동사 문장: be동사를 주어 앞으로 보냅니다. (They are happy → Only then are they happy)','② 조동사(can, will, may, must 등) 문장: 조동사를 주어 앞으로 보내고 본동사는 원형 그대로. (You can see → Only now can you see)','③ 일반동사 문장: 조동사가 없으므로 do/does/did를 만들어 주어 앞에 쓰고, 본동사는 원형으로 돌려놓습니다. 시제와 인칭은 do/does/did가 가져갑니다. (You realize → do you realize / She knows → does she know / He learned → did he learn)','도치되는 것은 "Only 뒤 부사구/부사절" 바로 다음의 주절입니다. Only 부사절 안의 문장(when you start ...)은 도치하지 않습니다.','참고: Only가 주어를 꾸미면(Only he knows) 도치하지 않습니다. 부사(구·절)일 때만 도치.'],
     table:[['주절 동사','도치 방법','예'],['be동사','be + 주어','Only then was he calm.'],['조동사','조동사 + 주어 + 동사원형','Only now can you see it.'],['일반동사','do/does/did + 주어 + 동사원형','Only when you start ... do you realize']],
     ex:[['Only when you start to learn the practice of science do you realize that each of these "facts" was hard won','과학의 실제 과정을 배우기 시작해야 비로소 이 "사실"들이 어렵게 얻어졌음을 깨닫는다','do you realize']],
     tip:'확인법: 도치 전 문장을 먼저 만드세요. You realize → 일반동사니까 do 필요 → do you realize. 동사는 반드시 원형(realizes, realized 아님).'},
-   {t:'7. 가주어 it / 진주어',
+   {no:[8],t:'so + 동사 + 주어 (~도 그렇다)',
+    pts:['앞 문장이 긍정일 때 "~도 그렇다"는 so + (be / 조동사 / do·does·did) + 주어. 앞 문장의 동사 종류와 시제에 맞춥니다.','앞 문장이 일반동사 → so does/do/did + 주어. be동사 → so is/are/was + 주어. 조동사 → so can/will + 주어.','부정문이면 neither/nor + 같은 도치를 씁니다. (Neither do I)','Only 도치와 같이 일반동사는 do/does/did를 새로 만들어 쓴다는 점이 같습니다.'],
+    ex:[['The euphoria of first love fades, and so does the despair of a break-up','첫사랑의 황홀감은 사라지고, 이별의 절망도 그렇다','so does the despair']]},
+   {no:[6],t:'7. 가주어 it / 진주어',
     pts:['주어가 길면 it을 앞에 두고 진짜 주어(to부정사, that절)를 뒤로 보냅니다.','it is + 형용사/명사 + to V: ~하는 것은 ~이다.'],
     ex:[['it is in their interest to do so','그렇게 하는 것이 그들에게 이익이 된다','it is in their interest to do so']]},
-   {t:'8. 분사구문과 분사',
+   {no:[2,6,8,9,12],t:'8. 분사구문과 분사',
     pts:['능동 관계는 -ing, 수동 관계는 p.p.를 씁니다.','depending on ~ = ~에 따라, combined with ~ = ~와 결합되어.','분사구문은 접속사 + 주어를 줄이고 동사를 분사로 바꾼 모양입니다.'],
     ex:[['depending upon where we are in that process','우리가 그 과정의 어디에 있느냐에 따라','depending upon']]},
-   {t:'9. the 비교급 ~, the 비교급 ~',
+   {no:[9,12],t:'동명사 주어, 수동 to부정사, without being p.p.',
+    pts:['동명사(-ing)가 이끄는 구가 주어이면 단수 취급, 동사는 단수형(is). 주어가 길어도 핵심은 -ing 하나입니다.','be expected to V = V하리라 기대된다 (expect A to V의 수동).','전치사 + 동명사의 수동은 being + p.p. (without being disturbed = 방해받지 않고).','with + 목적어 + p.p. = ~이 ~된 채로 (with the tears wiped off).'],
+    ex:[['having more data is better for making predictions','더 많은 자료를 갖는 것이 예측에 더 낫다','having more data is'],['turning people\'s lives into numbers is morally insulating','사람들의 삶을 숫자로 바꾸는 것은 도덕적으로 감정을 차단한다','turning people\'s lives into numbers is'],['without being disturbed','방해받지 않고','without being disturbed']]},
+   {no:[6,9],t:'9. the 비교급 ~, the 비교급 ~',
     pts:['~할수록 더 ~하다. 두 덩어리 모두 the + 비교급으로 시작합니다.','뒤 덩어리도 같은 구조로 병렬을 이룹니다.'],
     ex:[['the more we have, the bigger our fences','더 많이 가질수록 울타리는 더 커진다','the more we have']]},
-   {t:'10. 병렬 (and / or / but)',
+   {no:[2,6,8,9,12],t:'10. 병렬 (and / or / but)',
     pts:['and, or, but 앞뒤에는 같은 형태가 옵니다. 명사끼리, 동사끼리, to부정사끼리.','병렬 대상이 무엇인지 먼저 찾으세요(어디서부터 어디까지인지).'],
     ex:[['our natural tendency to share and cooperate','나누고 협력하려는 타고난 성향','share and cooperate']]},
-   {t:'11. 비교 표현: less A than B, no more A than B',
+   {no:[2,12],t:'11. 비교 표현: less A than B, no more A than B',
     pts:['less A than B = A라기보다 B. 강조점은 B.','no more A than B = B가 아니듯 A도 아니다.'],
     ex:[['The process of science is less about collecting pieces of knowledge than it is about reducing the uncertainties','과학의 과정은 지식 조각을 모으는 것이라기보다 불확실성을 줄이는 것이다','less about']]}
   ];
-  function guideSection(app){
-    app.appendChild(mk('h2',null,'어법 기초 정리'));
-    app.appendChild(mk('p','lead','필기 노트의 that·where 구별법과 지문에 나온 어법을 처음부터 순서대로 정리했습니다. 제목을 눌러 펼치세요.'));
-    GUIDE.forEach(function(g){
-      var d=mk('details','gd');if(g.open)d.open=true;
-      d.appendChild(mk('summary',null,g.t));
+  function guideSection(app,no,heading,lead){
+    var list=GUIDE.filter(function(g){return !no||g.no.indexOf(no)>=0});
+    if(!list.length)return;
+    app.appendChild(mk('h2',null,heading));
+    if(lead)app.appendChild(mk('p','lead',lead));
+    list.forEach(function(g){
+      var d=mk('details','gd');if(g.open&&!no)d.open=true;
+      d.appendChild(mk('summary',null,g.t.replace(/^[\d-]+\.\s*/,'')));
       var b=mk('div','gb');
       if(g.pts){var ul=mk('ul');g.pts.forEach(function(x){ul.appendChild(mk('li',null,x))});b.appendChild(ul)}
       if(g.table){
@@ -1302,14 +1318,24 @@ var EXAMPLE5=[
       if(g.tip)b.appendChild(mk('div','tip',g.tip));
       d.appendChild(b);app.appendChild(d);
     });
-    app.appendChild(mk('h2',null,'지문별 어법 모아보기'));
   }
 
   /* ---------- 화면: 누적 어법 ---------- */
   function viewGram(app){
     if(state.quiz&&state.quiz.kind==='gram'){viewQuiz(app);return}
-    var items=gramItems(allPassages());
-    guideSection(app);
+    var ap=allPassages(),nums=['전체'];
+    ap.forEach(function(p){var n=p.no+'번';if(nums.indexOf(n)<0)nums.push(n)});
+    if(nums.indexOf(state.gNo)<0)state.gNo='전체';
+    var plist=state.gNo==='전체'?ap:ap.filter(function(p){return p.no+'번'===state.gNo});
+    var items=gramItems(plist);
+    app.appendChild(mk('h2',null,'어법 복습'));
+    app.appendChild(mk('p','lead','문제 번호를 고르면 그 문제에 나온 어법만 보입니다. 순서: 2번 풀기 → 2번 어법 복습 → 6번 풀기 → 6번 어법 복습 …'));
+    var np=mk('section','panel');
+    chips(np,'문제',nums,state.gNo,function(v){state.gNo=v;render()});
+    app.appendChild(np);
+    var gno=state.gNo==='전체'?0:parseInt(state.gNo,10);
+    guideSection(app,gno,gno?gno+'번 어법 기초 정리':'어법 기초 정리 (전체)');
+    app.appendChild(mk('h2',null,gno?gno+'번 지문에 표시된 어법':'지문에 표시된 어법'));
     app.appendChild(mk('p','lead','지문에서 표시한 어법, 관계사, 연결어, 대명사가 설명과 함께 모입니다.'));
     var qi=items.filter(function(x){return x.pt.type!=='대명사'&&x.label});
     if(qi.length>=3){
