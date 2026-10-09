@@ -1132,7 +1132,8 @@ var EXAMPLE5=[
     nums.sort(function(a,b){return a-b});
     return nums.map(function(n,i){
       var pl=ap.filter(function(p){return p.no<=n});
-      return {k:i+1,n:n,label:(i+1)+'회차',range:nums[0]===n?(n+'번'):(nums[0]+'~'+n+'번 누적'),items:vocabItems(pl)};
+      var lb=nums[0]===n?(n+'번'):(nums[0]+'~'+n+'번');
+      return {k:i+1,n:n,label:lb,range:nums[0]===n?lb:(lb+' 누적'),items:vocabItems(pl)};
     });
   }
   function startExam(r,name){
@@ -1159,8 +1160,8 @@ var EXAMPLE5=[
     var rounds=examRounds(),nm='';
     try{nm=localStorage.getItem('momtutor_name')||''}catch(e){}
     var pn=mk('section','panel');
-    pn.appendChild(mk('h2',null,'회차별 단어 시험'));
-    pn.appendChild(mk('p','lead','회차가 올라갈수록 앞 번호의 단어가 누적됩니다. 4지선다이고, 끝나면 결과가 구글 시트로 전송됩니다.'));
+    pn.appendChild(mk('h2',null,'지문 번호별 단어 시험'));
+    pn.appendChild(mk('p','lead','번호가 올라갈수록 앞 번호의 단어가 누적됩니다. 예: 6번 시험 = 2번 + 6번 단어. 4지선다이고, 끝나면 결과가 구글 시트로 전송됩니다.'));
     var row=mk('div','row');row.appendChild(mk('label',null,'이름'));
     var inp=mk('input');inp.type='text';inp.maxLength=30;inp.value=nm;inp.placeholder='이름을 적어 주세요';inp.className='grow';inp.id='exam-name';
     row.appendChild(inp);pn.appendChild(row);
@@ -1168,7 +1169,7 @@ var EXAMPLE5=[
     app.appendChild(pn);
     rounds.forEach(function(r){
       var c=mk('div','gc'),h=mk('div','row');
-      h.appendChild(mk('b',null,r.label));h.appendChild(mk('span','src2',r.range+' · 단어 '+r.items.length+'개'));
+      h.appendChild(mk('b',null,r.label+' 시험'));h.appendChild(mk('span','src2',(r.range===r.label?'':r.range+' · ')+'단어 '+r.items.length+'개'));
       c.appendChild(h);
       var stx=examStats()[r.label];
       if(stx&&stx.n)c.appendChild(mk('p','rec','응시 '+stx.n+'회 · 최고 '+stx.best+' / '+(stx.total||r.items.length)));
@@ -1212,7 +1213,7 @@ var EXAMPLE5=[
         state.exam=null;state.vs=null;state.vtab='words';
         render();
       }));
-      r2.appendChild(btn('같은 회차 다시 보기','outline',function(){startExam(ex.r,ex.name)}));
+      r2.appendChild(btn('같은 시험 다시 보기','outline',function(){startExam(ex.r,ex.name)}));
       r2.appendChild(btn('끝내기',null,function(){state.exam=null;render()}));
       panel.appendChild(r2);app.appendChild(panel);return;
     }
