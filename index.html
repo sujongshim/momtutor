@@ -1688,7 +1688,8 @@ var EXAMPLE5=[
   }
 
   /* ---------- 천일문 단어장 (Chapter 2, UNIT 10~14) ---------- */
-  var CH_UNITS=[10,11,12,13,14];
+  var CH_UNITS=[10,11,12,13,14,99];
+  function chTitle(u){return u===99?'추가 표현':'UNIT '+u}
   var CHUNIL=[
    {u:10,n:'088',h:'voter',m:'유권자, 투표자'},
    {u:10,n:'089',h:'adopt',m:'채택하다; 입양하다'},
@@ -1741,7 +1742,10 @@ var EXAMPLE5=[
    {u:13,h:'go wrong',m:'잘못되다; 실수를 하다; 고장 나다'},
    {u:14,n:'125',h:'recover',m:'회복하다 (= get better)'},
    {u:14,n:'127',h:'lost',m:'길을 잃은; 분실된'},
-   {u:14,n:'128',h:"to one's surprise",m:'놀랍게도'}
+   {u:14,n:'128',h:"to one's surprise",m:'놀랍게도'},
+   {u:99,h:'it takes',m:'시간이 걸리다',alt:['it takes time']},
+   {u:99,h:'it seems (appears) that ~',m:'~인 것 같다',alt:['it seems that','it appears that']},
+   {u:99,h:'it happens that ~',m:'우연히/공교롭게도 ~하다'}
   ];
   /* 시험용 뜻: 괄호 안 동의어·반의어(= ~, ↔ ~)는 빼서 정답이 드러나지 않게 한다 */
   function chClean(m){return String(m).replace(/\s*\((=|↔)[^)]*\)/g,'').trim()}
@@ -1752,25 +1756,25 @@ var EXAMPLE5=[
   }
   function chRounds(){
     var pool=chItems();
-    var rs=CH_UNITS.map(function(u){return {n:u,label:'천일문 UNIT '+u,items:chItems(u),pool:pool,chunil:true}});
-    rs.push({n:0,label:'천일문 UNIT 10~14 전체',items:pool,pool:pool,chunil:true});
+    var rs=CH_UNITS.map(function(u){return {n:u,label:'천일문 '+chTitle(u),items:chItems(u),pool:pool,chunil:true}});
+    rs.push({n:0,label:'천일문 전체',items:pool,pool:pool,chunil:true});
     return rs;
   }
   function viewChunil(app){
     if(state.exam&&state.exam.r.chunil){viewExam(app);return}
     app.appendChild(mk('h2',null,'천일문 단어장'));
-    app.appendChild(mk('p','lead','Chapter 2 · UNIT 10~14 단어입니다. 단어를 외운 뒤 시험 탭에서 객관식·주관식으로 확인하세요.'));
+    app.appendChild(mk('p','lead','Chapter 2 · UNIT 10~14 단어와 추가 표현입니다. 단어를 외운 뒤 시험 탭에서 객관식·주관식으로 확인하세요.'));
     var tabs=mk('div','chips');
     [['words','단어'],['exam','시험']].forEach(function(t){tabs.appendChild(btn(t[1],'pill'+((state.cTab||'words')===t[0]?' on':''),function(){state.cTab=t[0];state.msg='';render()}))});
     app.appendChild(tabs);
-    if(state.cTab==='exam'){vExam(app,chRounds(),'천일문 단어 시험','선택한 UNIT의 단어로만 출제됩니다(전체 시험은 UNIT 10~14 모두). 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.');return}
+    if(state.cTab==='exam'){vExam(app,chRounds(),'천일문 단어 시험','선택한 UNIT의 단어로만 출제됩니다(전체 시험은 UNIT 10~14와 추가 표현 모두). 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.');return}
     var bar=mk('div','row');
     var hb=btn(state.cHide?'뜻 보이기':'뜻 가리기',null,function(){state.cHide=!state.cHide;render()});
     bar.appendChild(hb);bar.appendChild(mk('span','status','뜻을 가린 상태에서 단어를 누르면 잠깐 보입니다.'));
     app.appendChild(bar);
     CH_UNITS.forEach(function(u){
       var pn=mk('section','panel');
-      pn.appendChild(mk('h2',null,'UNIT '+u+' · 단어 '+chItems(u).length+'개'));
+      pn.appendChild(mk('h2',null,chTitle(u)+' · 단어 '+chItems(u).length+'개'));
       var ul=mk('ul','wbl'+(state.cHide?' hide-mean':''));
       CHUNIL.filter(function(x){return x.u===u}).forEach(function(x){
         var li=mk('li'),h=mk('div','wh');
