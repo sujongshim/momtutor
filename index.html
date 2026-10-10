@@ -1319,11 +1319,8 @@ var EXAMPLE5=[
     else vToday(app,items);
   }
   function vGroups(){
-    var seen={},bs=[];
-    allPassages().forEach(function(p){if(!seen[p.book]){seen[p.book]=1;bs.push(p.book)}});
-    return bs.map(function(b){
-      return {id:'b:'+b,label:b,match:function(x){return x.book===b},
-        subs:allPassages().filter(function(p){return p.book===b}).map(function(p){return [p.id,pname(p)]})};
+    return allPassages().filter(function(p){return vocabItems([p]).length}).map(function(p){
+      return {id:'p:'+p.id,label:pname(p),match:function(x){return x.pid===p.id},subs:[]};
     });
   }
   function vToday(app,items,opts){
@@ -1334,7 +1331,7 @@ var EXAMPLE5=[
     var g=groups.filter(function(x){return x.id===state[gk]})[0];
     var gi=items.filter(g.match),v=load().v;
     var sel=mk('section','panel');
-    chips(sel,opts.unitLabel||'회',groups.map(function(x){return x.label}),g.label,function(lab){
+    chips(sel,opts.unitLabel||'지문',groups.map(function(x){return x.label}),g.label,function(lab){
       state[gk]=groups.filter(function(x){return x.label===lab})[0].id;state.msg='';render();
     });
     app.appendChild(sel);
@@ -1360,7 +1357,7 @@ var EXAMPLE5=[
     var ms=mk('select');ms.id='vs-mode';[['card','카드 넘기기'],['quiz','뜻 고르기']].forEach(function(x){var o=mk('option',null,x[1]);o.value=x[0];ms.appendChild(o)});
     var ps=mk('select');ps.id='vs-pass';var o0=mk('option',null,g.label+' 전체');o0.value='';ps.appendChild(o0);
     (g.subs||[]).forEach(function(x){var o=mk('option',null,x[1]);o.value=x[0];ps.appendChild(o)});
-    row.appendChild(ms);row.appendChild(ps);cp.appendChild(row);
+    row.appendChild(ms);if((g.subs||[]).length)row.appendChild(ps);cp.appendChild(row);
     function scoped(){return gi.filter(function(x){return !ps.value||x.pid===ps.value})}
     var r2=mk('div','row');
     r2.appendChild(btn('이 범위 전부',null,function(){startVS(ms.value,shuffle(scoped()),false,items)}));
