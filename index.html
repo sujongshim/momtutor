@@ -1147,19 +1147,20 @@ var EXAMPLE5=[
   /* 주관식 채점: 대소문자·공백·문장부호는 무시, 스펠링은 정확히 */
   function spellNorm(x,dropPlaceholders){
     var t=String(x||'').replace(/[’‘]/g,"'").replace(/\([^)]*\)/g,' ');
-    if(dropPlaceholders)t=t.split(/\s+/).filter(function(w){return !/^(~|~ing|-ing|A|B)$/.test(w)}).join(' ');
+    if(dropPlaceholders)t=t.split(/\s+/).filter(function(w){return !/^(~|~ing|-ing|A|B|C|O|v|V|to-v|v-ing|V-ing)$/.test(w)}).join(' ');
     return t.toLowerCase().replace(/[~\-;,.!?]/g,' ').replace(/\s+/g,' ').trim();
   }
   function spellOk(it,ans){
     var n=spellNorm(ans);if(!n)return false;
-    return [it.h,it.p].some(function(c){return c&&(spellNorm(c)===n||spellNorm(c,true)===n)});
+    var nd=spellNorm(ans,true);
+    return [it.h,it.p].concat(it.alt||[]).some(function(c){return c&&(spellNorm(c)===n||spellNorm(c,true)===n||(nd&&spellNorm(c,true)===nd))});
   }
   function spellHint(it){
     var w=spellNorm(it.h,true).split(' ');
     return '첫 글자 "'+w[0].charAt(0)+'" · '+w.length+'단어';
   }
   function startExam(r,name,type){
-    var pool=vocabItems(allPassages()).map(function(x){return x.m}).filter(function(m){return m&&m.length<=40});
+    var pool=(r.pool||vocabItems(allPassages())).map(function(x){return x.m}).filter(function(m){return m&&m.length<=40});
     var qs=shuffle(r.items.slice()).map(function(it){
       var d=[];
       if(type==='객관식')shuffle(pool.slice()).forEach(function(m){if(m!==it.m&&d.indexOf(m)<0&&d.length<3)d.push(m)});
@@ -1196,12 +1197,14 @@ var EXAMPLE5=[
     if(ex.i>=ex.qs.length)finishExam(ex);
     render();
   }
-  function vExam(app){
-    var rounds=examRounds(),nm='';
+  function vExam(app,rounds,title,lead){
+    rounds=rounds||examRounds();title=title||'지문 번호별 단어 시험';
+    lead=lead||'선택한 번호의 단어로만 출제됩니다. 시험이 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.';
+    var nm='';
     try{nm=localStorage.getItem('momtutor_name')||''}catch(e){}
     var pn=mk('section','panel');
-    pn.appendChild(mk('h2',null,'지문 번호별 단어 시험'));
-    pn.appendChild(mk('p','lead','선택한 번호의 단어로만 출제됩니다. 시험이 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.'));
+    pn.appendChild(mk('h2',null,title));
+    pn.appendChild(mk('p','lead',lead));
     var row=mk('div','row');row.appendChild(mk('label',null,'이름'));
     var inp=mk('input');inp.type='text';inp.maxLength=30;inp.value=nm;inp.placeholder='이름을 적어 주세요';inp.className='grow';inp.id='exam-name';
     row.appendChild(inp);pn.appendChild(row);
@@ -1268,7 +1271,7 @@ var EXAMPLE5=[
       panel.appendChild(ul);
       var r2=mk('div','row');
       r2.appendChild(btn('같은 시험 다시 보기','outline',function(){startExam(ex.r,ex.name,ex.type)}));
-      if(ex.wrong.length)r2.appendChild(btn('단어 탭에서 복습하기','primary',function(){state.exam=null;state.vs=null;state.vtab='words';render()}));
+      if(ex.wrong.length)r2.appendChild(btn(ex.r.chunil?'천일문 단어 보며 복습하기':'단어 탭에서 복습하기','primary',function(){state.exam=null;state.vs=null;if(ex.r.chunil)state.cTab='words';else state.vtab='words';render()}));
       r2.appendChild(btn('끝내기',null,function(){state.exam=null;render()}));
       panel.appendChild(r2);app.appendChild(panel);return;
     }
@@ -1302,7 +1305,7 @@ var EXAMPLE5=[
 
   function viewVocab(app){
     if(state.vs){viewSession(app);return}
-    if(state.exam){viewExam(app);return}
+    if(state.exam&&!state.exam.r.chunil){viewExam(app);return}
     var items=vocabItems(allPassages());
     app.appendChild(mk('h2',null,'누적 단어장'));
     app.appendChild(mk('p','lead','지문에서 연보라로 표시한 단어·표현이 모입니다. 알아요를 누르면 1 → 3 → 7 → 14 → 30 → 60일 뒤에 다시 나옵니다.'));
@@ -1684,8 +1687,106 @@ var EXAMPLE5=[
     app.appendChild(rs);
   }
 
+  /* ---------- 천일문 단어장 (Chapter 2, UNIT 10~14) ---------- */
+  var CH_UNITS=[10,11,12,13,14];
+  var CHUNIL=[
+   {u:10,n:'088',h:'voter',m:'유권자, 투표자'},
+   {u:10,n:'089',h:'adopt',m:'채택하다; 입양하다'},
+   {u:10,h:'remain C',m:'C한 상태로 남다; 여전히 C이다'},
+   {u:10,h:'confidential',m:'기밀의; 신뢰를 받는'},
+   {u:10,cf:1,h:'confidence',m:'신뢰; 확신'},
+   {u:10,n:'092',h:'look for A',m:'A를 찾다, 구하다'},
+   {u:10,n:'093',h:'interest',m:'흥미롭게 하다; 흥미'},
+   {u:10,h:'audience',m:'관객, 관중'},
+   {u:10,n:'095',h:'host',m:'개최[주최]하다; 주최국; 주인'},
+   {u:10,h:'announce',m:'발표하다, 알리다'},
+   {u:10,n:'096',h:'have an influence on',m:'~에 영향을 미치다'},
+   {u:10,cf:1,h:'influential',m:'영향력이 큰'},
+   {u:10,h:'major',m:'중요한, 주요한; 다수의 (↔ minor 사소한; 소수의); 전공(하다)'},
+   {u:11,n:'097',h:'delight',m:'기쁨, 즐거움; 기쁘게 하다'},
+   {u:11,n:'098',h:'wealth',m:'재산, 부(富)'},
+   {u:11,cf:1,h:'wealthy',m:'부유한, 재산이 많은'},
+   {u:11,n:'099',h:'handle',m:'다루다 (= deal with); 취급하다'},
+   {u:11,n:'100',h:'decision',m:'결정, 판단'},
+   {u:11,h:'lead to A',m:'A를 초래하다, A로 이어지다'},
+   {u:11,h:'outcome',m:'결과'},
+   {u:11,n:'101',h:'contribute (to A)',m:'(A의) 원인이 되다; (A에) 기여하다',alt:['contribute to']},
+   {u:11,h:'obesity',m:'비만'},
+   {u:11,n:'102',h:'out there',m:'저곳에, 저쪽(에)'},
+   {u:11,n:'103',h:'physics',m:'물리학'},
+   {u:11,cf:1,h:'physical',m:'물리[물질]적인; 신체의'},
+   {u:11,n:'104',h:'all of a sudden',m:'갑자기 (= suddenly)'},
+   {u:11,n:'105',h:'spill',x:'(-spilt[spilled]-spilt[spilled])',m:'엎지르다, 흘리다; 쏟아지다'},
+   {u:12,n:'107',h:'keep up with',m:'~을 따라가다; ~을 알다[알게 되다]'},
+   {u:12,n:'110',h:'pedestrian',m:'보행자'},
+   {u:12,h:'wait for A to-v',m:'A가 v하기를 기다리다'},
+   {u:12,n:'112',h:'careless',m:'조심성 없는 (↔ careful 조심성 있는)'},
+   {u:12,n:'113',h:'attachment',m:'첨부 파일; 부착물; 애착'},
+   {u:12,cf:1,h:'attach',m:'붙이다, 첨부하다 (↔ detach 떼다, 분리하다)'},
+   {u:12,h:'unknown',m:'알려지지 않은; 이름 없는'},
+   {u:12,h:'source',m:'출처; 근원'},
+   {u:13,n:'114',h:'appreciate v-ing',m:'V한 것에 대해 고마워하다'},
+   {u:13,n:'115',h:'in spite of',m:'~에도 불구하고 (= despite)'},
+   {u:13,h:'chilly',m:'(날씨가) 차가운, 쌀쌀한'},
+   {u:13,n:'116',h:'request',m:'요구(하다), 요청(하다)'},
+   {u:13,h:'chance of v-ing',m:'V할 가능성'},
+   {u:13,h:'chance to-v',m:'V할 기회'},
+   {u:13,h:'afterward(s)',m:'나중에, 그 후에',alt:['afterwards']},
+   {u:13,n:'117',h:'scholarship',m:'장학금'},
+   {u:13,cf:1,h:'scholar',m:'장학생; 학자'},
+   {u:13,h:'semester',m:'학기; 기간'},
+   {u:13,n:'118',h:'complain about',m:'~에 대해 불평하다'},
+   {u:13,h:'make O C',m:'O를 C하게 만들다'},
+   {u:13,n:'119',h:'policymaker',m:'정책 입안자'},
+   {u:13,h:'go wrong',m:'잘못되다; 실수를 하다; 고장 나다'},
+   {u:14,n:'125',h:'recover',m:'회복하다 (= get better)'},
+   {u:14,n:'127',h:'lost',m:'길을 잃은; 분실된'},
+   {u:14,n:'128',h:"to one's surprise",m:'놀랍게도'}
+  ];
+  /* 시험용 뜻: 괄호 안 동의어·반의어(= ~, ↔ ~)는 빼서 정답이 드러나지 않게 한다 */
+  function chClean(m){return String(m).replace(/\s*\((=|↔)[^)]*\)/g,'').trim()}
+  function chItems(u){
+    return CHUNIL.filter(function(x){return !u||x.u===u}).map(function(x){
+      return {h:x.h,m:chClean(x.m),full:x.m,alt:x.alt,u:x.u,k:'ch|'+x.h,p:''};
+    });
+  }
+  function chRounds(){
+    var pool=chItems();
+    var rs=CH_UNITS.map(function(u){return {n:u,label:'천일문 UNIT '+u,items:chItems(u),pool:pool,chunil:true}});
+    rs.push({n:0,label:'천일문 UNIT 10~14 전체',items:pool,pool:pool,chunil:true});
+    return rs;
+  }
+  function viewChunil(app){
+    if(state.exam&&state.exam.r.chunil){viewExam(app);return}
+    app.appendChild(mk('h2',null,'천일문 단어장'));
+    app.appendChild(mk('p','lead','Chapter 2 · UNIT 10~14 단어입니다. 단어를 외운 뒤 시험 탭에서 객관식·주관식으로 확인하세요.'));
+    var tabs=mk('div','chips');
+    [['words','단어'],['exam','시험']].forEach(function(t){tabs.appendChild(btn(t[1],'pill'+((state.cTab||'words')===t[0]?' on':''),function(){state.cTab=t[0];state.msg='';render()}))});
+    app.appendChild(tabs);
+    if(state.cTab==='exam'){vExam(app,chRounds(),'천일문 단어 시험','선택한 UNIT의 단어로만 출제됩니다(전체 시험은 UNIT 10~14 모두). 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.');return}
+    var bar=mk('div','row');
+    var hb=btn(state.cHide?'뜻 보이기':'뜻 가리기',null,function(){state.cHide=!state.cHide;render()});
+    bar.appendChild(hb);bar.appendChild(mk('span','status','뜻을 가린 상태에서 단어를 누르면 잠깐 보입니다.'));
+    app.appendChild(bar);
+    CH_UNITS.forEach(function(u){
+      var pn=mk('section','panel');
+      pn.appendChild(mk('h2',null,'UNIT '+u+' · 단어 '+chItems(u).length+'개'));
+      var ul=mk('ul','wbl'+(state.cHide?' hide-mean':''));
+      CHUNIL.filter(function(x){return x.u===u}).forEach(function(x){
+        var li=mk('li'),h=mk('div','wh');
+        if(x.cf)h.appendChild(mk('span','src2','cf.'));
+        h.appendChild(mk('span','t',x.h+(x.x?' '+x.x:'')));
+        if(x.n)h.appendChild(mk('span','src2',x.n));
+        li.appendChild(h);li.appendChild(mk('div','wm',x.m));
+        li.addEventListener('click',function(){li.classList.toggle('peek')});
+        ul.appendChild(li);
+      });
+      pn.appendChild(ul);app.appendChild(pn);
+    });
+  }
+
   /* ---------- 라우팅 ---------- */
-  var TABS=[['list','지문'],['vocab','단어장'],['gram','어법 복습'],['record','학습 기록']];
+  var TABS=[['list','지문'],['vocab','단어장'],['gram','어법 복습'],['chunil','천일문 단어장'],['record','학습 기록']];
   function go(v,pid){state.view=v;state.pid=pid||null;state.quiz=null;state.vs=null;state.msg='';closePop();render();try{window.scrollTo(0,0)}catch(e){}}
   function render(){
     var nav=document.getElementById('nav'),app=document.getElementById('app');
@@ -1698,6 +1799,7 @@ var EXAMPLE5=[
     if(state.view==='passage')viewPassage(app);
     else if(state.view==='vocab')viewVocab(app);
     else if(state.view==='gram')viewGram(app);
+    else if(state.view==='chunil')viewChunil(app);
     else if(state.view==='record')viewRecord(app);
     else viewList(app);
   }
