@@ -1339,7 +1339,7 @@ var EXAMPLE5=[
     var ps=mk('select');ps.id='vs-pass';var o0=mk('option',null,(opts&&opts.allLabel)||'모든 지문');o0.value='';ps.appendChild(o0);
     ((opts&&opts.scopes)||allPassages().map(function(p){return [p.id,pname(p)]})).forEach(function(x){var o=mk('option',null,x[1]);o.value=x[0];ps.appendChild(o)});
     row.appendChild(ms);row.appendChild(ps);cp.appendChild(row);
-    function scoped(){return items.filter(function(x){return !ps.value||x.pid===ps.value})}
+    function scoped(){return items.filter(function(x){return !ps.value||x.pid===ps.value||x.cid===ps.value})}
     var r2=mk('div','row');
     r2.appendChild(btn('이 범위 전부',null,function(){startVS(ms.value,shuffle(scoped()),false,items)}));
     r2.appendChild(btn('자주 틀린 단어',null,function(){startVS(ms.value,shuffle(scoped().filter(function(x){var r=v[x.k];return r&&(r.ng||0)>=2})),false,items)}));
@@ -1690,9 +1690,42 @@ var EXAMPLE5=[
   }
 
   /* ---------- 천일문 단어장 (Chapter 2, UNIT 10~14) ---------- */
-  var CH_UNITS=[10,11,12,13,14,99];
+  var CH_CHAPTERS=[{c:2,units:[8,9,10,11,12,13,14,99]},{c:3,units:[15,16,17,18,19,20]}];
+  var CH_UNITS=[].concat.apply([],CH_CHAPTERS.map(function(c){return c.units}));
+  function chapterOf(u){var r=0;CH_CHAPTERS.forEach(function(c){if(c.units.indexOf(u)>=0)r=c.c});return r}
   function chTitle(u){return u===99?'추가 표현':'UNIT '+u}
   var CHUNIL=[
+   {u:8,n:'072',h:'be good for',m:'~에 좋다'},
+   {u:8,h:'mental',m:'정신의, 마음의'},
+   {u:8,h:'keep journals',m:'일기를 쓰다'},
+   {u:8,cf:1,h:'journal',m:'일기; 잡지; 신문'},
+   {u:8,n:'073',h:'cram',m:'벼락공부를 하다'},
+   {u:8,h:'seem like',m:'~인 것 같다'},
+   {u:8,n:'074',h:'help O (to-)v',m:'O가 v하도록 돕다'},
+   {u:8,n:'076',h:'try to-v',m:'v하려고 노력하다[애쓰다]',alt:['try to']},
+   {u:8,h:'point of view',m:'관점 (= viewpoint, perspective)'},
+   {u:8,n:'077',h:'search for',m:'~을 찾다[탐구하다]'},
+   {u:8,h:'possibility',m:'가능성 (= likelihood); 기회 (= opportunity, chance)'},
+   {u:8,h:'inquisitive',m:'탐구심이 많은'},
+   {u:8,cf:1,h:'inquire',m:'질문을 하다, 묻다'},
+   {u:8,h:'essential',m:'필수적인 (↔ inessential 꼭 필요한 것은 아닌); 본질적인'},
+   {u:8,n:'078',h:'common',m:'일반적인; 공통적인; 흔한 (↔ uncommon 보기 드문)'},
+   {u:9,n:'081',h:'will',m:'의지; 유언(장)'},
+   {u:9,n:'082',h:'go extinct',m:'멸종되다'},
+   {u:9,cf:1,h:'extinct',m:'멸종된; 활동을 멈춘'},
+   {u:9,cf:1,h:'extinction',m:'멸종, 소멸'},
+   {u:9,h:'academic',m:'학문의, 학업의'},
+   {u:9,n:'084',h:'affect',m:'영향을 미치다'},
+   {u:9,n:'085',h:'in v-ing',m:'v할 때, v함에 있어서'},
+   {u:9,h:'make a proposal',m:'제안하다'},
+   {u:9,cf:1,h:'proposal',m:'제안; 청혼'},
+   {u:9,h:'logical',m:'논리적인; 타당한 (↔ illogical 비논리적인; 터무니없는)'},
+   {u:9,cf:1,h:'logic',m:'논리(학); 타당성'},
+   {u:9,n:'086',h:'climate',m:'기후'},
+   {u:9,h:'be vital to-v',m:'v하는 데에 필수적이다',alt:['be vital to']},
+   {u:9,h:'assess',m:'가늠하다; 평가하다'},
+   {u:9,h:'current',m:'현재의; 통용되는; 해류'},
+   {u:9,h:'currency',m:'화폐, 통화'},
    {u:10,n:'088',h:'voter',m:'유권자, 투표자'},
    {u:10,n:'089',h:'adopt',m:'채택하다; 입양하다'},
    {u:10,h:'remain C',m:'C한 상태로 남다; 여전히 C이다'},
@@ -1722,7 +1755,7 @@ var EXAMPLE5=[
    {u:11,n:'105',h:'spill',x:'(-spilt[spilled]-spilt[spilled])',m:'엎지르다, 흘리다; 쏟아지다'},
    {u:12,n:'107',h:'keep up with',m:'~을 따라가다; ~을 알다[알게 되다]'},
    {u:12,n:'110',h:'pedestrian',m:'보행자'},
-   {u:12,h:'wait for A to-v',m:'A가 v하기를 기다리다'},
+   {u:12,h:'wait for A to-v',m:'A가 v하기를 기다리다',alt:['wait for A to']},
    {u:12,n:'112',h:'careless',m:'조심성 없는 (↔ careful 조심성 있는)'},
    {u:12,n:'113',h:'attachment',m:'첨부 파일; 부착물; 애착'},
    {u:12,cf:1,h:'attach',m:'붙이다, 첨부하다 (↔ detach 떼다, 분리하다)'},
@@ -1733,7 +1766,7 @@ var EXAMPLE5=[
    {u:13,h:'chilly',m:'(날씨가) 차가운, 쌀쌀한'},
    {u:13,n:'116',h:'request',m:'요구(하다), 요청(하다)'},
    {u:13,h:'chance of v-ing',m:'V할 가능성'},
-   {u:13,h:'chance to-v',m:'V할 기회'},
+   {u:13,h:'chance to-v',m:'V할 기회',alt:['chance to']},
    {u:13,h:'afterward(s)',m:'나중에, 그 후에',alt:['afterwards']},
    {u:13,n:'117',h:'scholarship',m:'장학금'},
    {u:13,cf:1,h:'scholar',m:'장학생; 학자'},
@@ -1748,40 +1781,131 @@ var EXAMPLE5=[
    {u:99,h:'it takes',m:'시간이 걸리다',alt:['it takes time']},
    {u:99,h:'it seems (appears) that ~',m:'~인 것 같다',alt:['it seems that','it appears that']},
    {u:99,h:'it happens that ~',m:'우연히/공교롭게도 ~하다'},
-   {u:99,h:'likelihood',m:'가능성'}
+   {u:99,h:'likelihood',m:'가능성'},
+   {u:15,n:'129',h:'emotional',m:'감정의; 감정적인'},
+   {u:15,h:'state',m:'상태; 국가; 말하다'},
+   {u:15,n:'130',h:'expectation',m:'기대, 예상'},
+   {u:15,cf:1,h:'expect',m:'기대[예상]하다'},
+   {u:15,n:'133',h:'unfulfilling',m:'성취감이 없는, 만족스럽지 못한'},
+   {u:15,cf:1,h:'fulfill',m:'만족시키다; 달성하다; 완료하다'},
+   {u:15,h:'the unknown',m:'미지의 것(들) [세계]'},
+   {u:15,n:'135',h:'storyteller',m:'작가, 이야기꾼'},
+   {u:15,h:'grab the attention of',m:'~의 관심을 끌다'},
+   {u:15,n:'137',h:'local',m:'지역의, 현지의; ((주로 복수형)) 현지인'},
+   {u:15,h:'politician',m:'정치인, 정치가'},
+   {u:15,n:'138',h:'take responsibility for',m:'~을 책임지다'},
+   {u:15,cf:1,h:'responsibility',m:'책임감, 의무'},
+   {u:15,cf:1,h:'responsible',m:'책임(감)이 있는'},
+   {u:15,n:'140',h:'treatment',m:'치료; 대우'},
+   {u:15,cf:1,h:'treat',m:'치료하다; 대하다, 취급하다'},
+   {u:15,n:'143',h:'injury',m:'상처, 부상'},
+   {u:16,n:'144',h:'seed',m:'씨앗'},
+   {u:16,n:'145',h:'novelist',m:'소설가'},
+   {u:16,cf:1,h:'novel',m:'소설; 새로운, 신기한'},
+   {u:16,h:'as ~ as possible',m:'가능한 한 ~한[하게]'},
+   {u:16,n:'149',h:'aim',m:'목표(하다); 겨냥(하다)'},
+   {u:16,h:'trigger',m:'방아쇠; (사건을 유발한) 계기; (일을) 촉발시키다'},
+   {u:16,n:'151',h:'be unable to-v',m:'v할 수 없다 (↔ be able to-v v할 수 있다)',alt:['be unable to']},
+   {u:16,n:'152',h:'make a decision',m:'결정하다 (= decide)'},
+   {u:16,h:'move on',m:'(잠시 멈췄던 길을) 계속 나아가다'},
+   {u:16,h:'look back',m:'(과거를) 되돌아보다'},
+   {u:16,n:'153',h:'value',m:'가치; ((복수형)) 가치관; 중요성; 소중히 여기다'},
+   {u:16,n:'155',h:'roadside',m:'길가의, 대로변의'},
+   {u:16,h:'stand',m:'가판대; 서다; 견디다'},
+   {u:16,h:'direction',m:'방향; 지시; 감독'},
+   {u:16,n:'158',h:'sufficiently',m:'충분히'},
+   {u:16,cf:1,h:'sufficient',m:'충분한 (↔ insufficient 불충분한); 알맞은'},
+   {u:16,h:'at least',m:'최소한, 적어도'},
+   {u:16,n:'159',h:'electric',m:'전기의, 전기를 이용하는'},
+   {u:17,n:'160',h:'journey',m:'(특히 멀리 가는) 여정, 여행'},
+   {u:17,h:'trip',m:'(짧은) 여행; 이동'},
+   {u:17,h:'destination',m:'도착지, 목적지'},
+   {u:17,n:'161',h:'path',m:'길; 방향; 진로, 경로'},
+   {u:17,n:'162',h:'impact',m:'영향[충격]을 주다; 영향; 충돌'},
+   {u:17,h:'perceive',m:'인식하다, 감지하다; 여기다'},
+   {u:17,cf:1,h:'perception',m:'인식; 지각, 자각'},
+   {u:17,n:'163',h:'duty',m:'(도덕적·법적) 의무; 직무'},
+   {u:17,h:'justice',m:'정의, 정당(성) (↔ injustice 불평등, 부당성)'},
+   {u:17,n:'164',h:'neurologist',m:'신경학자'},
+   {u:17,h:'remind O that',m:'O에게 ~을 상기시키다'},
+   {u:17,h:'warm-blooded',m:'온혈의; 열렬한 (↔ cold-blooded 냉혈의; 냉혹한)'},
+   {u:17,h:'mammal',m:'포유류'},
+   {u:17,n:'165',h:'pay off',m:'성공하다, 성과를 올리다'},
+   {u:17,n:'170',h:'identify',m:'찾다, 발견하다; (신원을) 확인하다; 동일시하다'},
+   {u:17,cf:1,h:'identity',m:'신원; 정체성; 유대감'},
+   {u:17,n:'172',h:'fault',m:'잘못, 실수; 단점'},
+   {u:17,cf:1,h:'faulty',m:'결함이 있는; 잘못된'},
+   {u:17,n:'173',k:'ch|announce#17',h:'announce',m:'발표하다, 공고하다'},
+   {u:17,h:'crime',m:'범죄'},
+   {u:18,n:'180',h:'superior',m:'우수한; 상급자 (↔ inferior 열등한; 하급자)'},
+   {u:18,n:'181',h:'regenerate',m:'(생물체의 일부분이) 재생되다[시키다]; 재건하다'},
+   {u:18,n:'182',h:'protect A from B',m:'A를 B로부터 보호하다'},
+   {u:18,h:'worsen',m:'악화되다[악화시키다] (= deteriorate)'},
+   {u:18,n:'184',h:'compare A to B',m:'A를 B에 비교[비유]하다'},
+   {u:18,cf:1,h:'comparison',m:'비교; 비유'},
+   {u:18,h:'self-esteem',m:'자존감, 자부심'},
+   {u:18,cf:1,h:'esteem',m:'존경(하다); 생각하다, 여기다'},
+   {u:18,n:'185',h:'disguise',m:'변장시키다[하다]; 변장'},
+   {u:18,h:'in place of',m:'~을 대신해서 (= on behalf of)'},
+   {u:18,n:'187',h:'to the end',m:'끝까지, 최후까지'},
+   {u:18,n:'193',h:'report',m:'보도하다; 보고서'},
+   {u:18,h:'journalist',m:'기자, 저널리스트'},
+   {u:18,h:'international',m:'국제적인'},
+   {u:18,h:'conflict',m:'갈등; 분쟁; 충돌[대립]하다'},
+   {u:19,n:'194',h:'still',m:'가만히 있는, 정지한; 아직(도)'},
+   {u:19,n:'195',h:'depend on A',m:'A에 달려 있다; A에 의존하다'},
+   {u:19,n:'196',h:'cosmetic',m:'화장품; 미용의'},
+   {u:19,n:'198',h:'be busy (in) v-ing',m:'v하느라 바쁘다',alt:['be busy in v-ing']},
+   {u:19,h:'balance',m:'균형을 유지하다; 균형'},
+   {u:19,n:'199',h:'have difficulty (in) v-ing',m:'v하는 데 어려움을 겪다',alt:['have difficulty in v-ing']},
+   {u:19,n:'200',h:'attitude',m:'태도, 자세'},
+   {u:19,h:'make all the difference to[in]',m:'~에 중요한 영향을 미치다',alt:['make all the difference to','make all the difference in']},
+   {u:19,n:'201',h:'significant',m:'중요한 (↔ insignificant 대수롭지 않은, 하찮은); (양·정도가) 상당한'},
+   {u:19,n:'202',h:'repetitive',m:'반복적인'},
+   {u:19,cf:1,h:'repeat',m:'반복하다; 따라 하다'},
+   {u:19,h:'security',m:'안정성, 안도감; 보안'},
+   {u:20,n:'204',h:'defeat',m:'처부수다, 패배시키다; 좌절시키다; 패배'},
+   {u:20,h:'barrier',m:'장벽; 장애물'},
+   {u:20,n:'205',h:'evident',m:'분명한, 눈에 띄는 (= obvious)'},
+   {u:20,n:'207',h:'emphasize',m:'강조하다'},
+   {u:20,cf:1,h:'emphasis',m:'강조'},
+   {u:20,n:'211',h:'look after A',m:'A를 돌보다 (= take care of A)'},
+   {u:20,n:'212',h:'infant',m:'유아; 유아용의'},
+   {u:20,h:'safeguard',m:'보호하다'},
+   {u:20,h:'supplementary',m:'보충의, 추가의'},
+   {u:20,cf:1,h:'supplement',m:'보충[추가](하다)'}
   ];
   /* 시험용 뜻: 괄호 안 동의어·반의어(= ~, ↔ ~)는 빼서 정답이 드러나지 않게 한다 */
   function chClean(m){return String(m).replace(/\s*\((=|↔)[^)]*\)/g,'').trim()}
   function chItems(u){
     return CHUNIL.filter(function(x){return !u||x.u===u}).map(function(x){
-      return {h:x.h,m:chClean(x.m),full:x.m,alt:x.alt,u:x.u,k:'ch|'+x.h,p:''};
+      return {h:x.h,m:chClean(x.m),full:x.m,alt:x.alt,u:x.u,k:x.k||('ch|'+x.h),p:''};
     });
   }
   /* 학습(오늘·단어·기록)용 항목: 단어장과 같은 구조 */
   function chStudy(){
     return CHUNIL.map(function(x){
-      return {k:'ch|'+x.h,h:x.h,m:x.m,s:'',p:'',pid:'u'+x.u,src:chTitle(x.u)+(x.n?' · '+x.n:'')};
+      return {k:x.k||('ch|'+x.h),h:x.h,m:x.m,s:'',p:'',pid:'u'+x.u,cid:'c'+chapterOf(x.u),src:chTitle(x.u)+(x.n?' · '+x.n:'')};
     });
   }
   /* 시험은 Chapter 단위: 지금은 Chapter 2(UNIT 10~14 + 추가 표현) 하나 */
-  var CH_CHAPTERS=[{c:2,units:CH_UNITS}];
   function chRounds(){
     var pool=chItems();
-    return CH_CHAPTERS.map(function(c){return {n:c.c,label:'천일문 Chapter '+c.c,items:pool,pool:pool,chunil:true}});
+    return CH_CHAPTERS.map(function(c){return {n:c.c,label:'천일문 Chapter '+c.c,items:pool.filter(function(x){return chapterOf(x.u)===c.c}),pool:pool,chunil:true}});
   }
   function viewChunil(app){
     if(state.vs){viewSession(app);return}
     if(state.exam&&state.exam.r.chunil){viewExam(app);return}
     var items=chStudy();
     app.appendChild(mk('h2',null,'천일문 단어장'));
-    app.appendChild(mk('p','lead','Chapter 2 · UNIT 10~14 단어와 추가 표현입니다. 알아요를 누르면 1 → 3 → 7 → 14 → 30 → 60일 뒤에 다시 나옵니다.'));
+    app.appendChild(mk('p','lead','Chapter 2(UNIT 8~14와 추가 표현), Chapter 3(UNIT 15~20) 단어입니다. 알아요를 누르면 1 → 3 → 7 → 14 → 30 → 60일 뒤에 다시 나옵니다.'));
     var tabs=mk('div','chips'),cur=state.cTab||'today';
     [['today','오늘'],['words','단어'],['exam','시험'],['rec','기록']].forEach(function(t){tabs.appendChild(btn(t[1],'pill'+(cur===t[0]?' on':''),function(){state.cTab=t[0];state.msg='';render()}))});
     app.appendChild(tabs);
-    if(cur==='exam')vExam(app,chRounds(),'천일문 단어 시험','Chapter 단위로 출제됩니다. 지금은 Chapter 2(UNIT 10~14와 추가 표현) 시험만 있습니다. 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.');
+    if(cur==='exam')vExam(app,chRounds(),'천일문 단어 시험','Chapter 단위로 출제됩니다. Chapter 2는 UNIT 8~14와 추가 표현, Chapter 3은 UNIT 15~20 단어입니다. 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.');
     else if(cur==='words')vWords(app,items);
     else if(cur==='rec')vRecord(app,items);
-    else vToday(app,items,{allLabel:'모든 단어',scopes:CH_UNITS.map(function(u){return ['u'+u,chTitle(u)]})});
+    else vToday(app,items,{allLabel:'모든 단어',scopes:CH_CHAPTERS.map(function(c){return ['c'+c.c,'Chapter '+c.c+' 전체']}).concat(CH_UNITS.map(function(u){return ['u'+u,chTitle(u)]}))});
   }
 
   /* ---------- 라우팅 ---------- */
