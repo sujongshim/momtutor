@@ -647,7 +647,7 @@ var EXAMPLE5=[
       if((pt.type!=='어휘'&&!pt.vocab)||pt.nowb)return;
       var h=String(pt.entry||pt.phrase||''),k=h.toLowerCase();
       if(!h||seen[k])return;seen[k]=1;
-      items.push({k:k,h:h,m:String(pt.meaning||pt.explanation||''),s:String(s.text||''),p:String(pt.phrase||''),pid:p.id,src:pname(p)});
+      items.push({k:k,h:h,m:String(pt.meaning||pt.explanation||''),s:String(s.text||''),p:String(pt.phrase||''),pid:p.id,book:p.book,src:pname(p)});
     })})});
     return items;
   }
@@ -1318,31 +1318,53 @@ var EXAMPLE5=[
     else if(state.vtab==='rec')vRecord(app,items);
     else vToday(app,items);
   }
+  function vGroups(){
+    var seen={},bs=[];
+    allPassages().forEach(function(p){if(!seen[p.book]){seen[p.book]=1;bs.push(p.book)}});
+    return bs.map(function(b){
+      return {id:'b:'+b,label:b,match:function(x){return x.book===b},
+        subs:allPassages().filter(function(p){return p.book===b}).map(function(p){return [p.id,pname(p)]})};
+    });
+  }
   function vToday(app,items,opts){
-    var due=dueItems(items),nw=newItems(items),v=load().v,n=setOf().newPerDay;
-    var memo=items.filter(function(x){return v[x.k]&&v[x.k].st>=4}).length;
+    opts=opts||{};
+    var groups=opts.groups||vGroups(),gk=opts.gkey||'vGroup';
+    if(!groups.length){app.appendChild(mk('p','status','단어가 없습니다.'));return}
+    if(!groups.some(function(x){return x.id===state[gk]}))state[gk]=groups[0].id;
+    var g=groups.filter(function(x){return x.id===state[gk]})[0];
+    var gi=items.filter(g.match),v=load().v;
+    var sel=mk('section','panel');
+    chips(sel,opts.unitLabel||'회',groups.map(function(x){return x.label}),g.label,function(lab){
+      state[gk]=groups.filter(function(x){return x.label===lab})[0].id;state.msg='';render();
+    });
+    app.appendChild(sel);
+    var due=dueItems(gi),nw=newItems(gi);
+    var memo=gi.filter(function(x){return v[x.k]&&v[x.k].st>=4}).length;
     var pn=mk('section','panel'),st=mk('div','stat');
-    st.appendChild(tile('복습할 단어',due.length));st.appendChild(tile('새 단어',Math.min(nw.length,n)));st.appendChild(tile('외운 단어',memo));
+    st.appendChild(tile('전체 단어',gi.length));st.appendChild(tile('다시 볼 단어',due.length));st.appendChild(tile('아직 안 본 단어',nw.length));st.appendChild(tile('외운 단어',memo));
     pn.appendChild(st);
-    var q=todayQueue(items);
-    pn.appendChild(mk('h2',null,'오늘 공부 시작'));
+    pn.appendChild(mk('h2',null,g.label+' 단어 공부'));
+    pn.appendChild(mk('p','lead','이 범위의 단어를 처음부터 끝까지 공부합니다. 알아요를 누르면 1 → 3 → 7 → 14 → 30 → 60일 뒤에 다시 나옵니다.'));
     var r=mk('div','row');
-    r.appendChild(btn('🃏 카드 넘기기 ('+q.length+')','primary',function(){startVS('card',todayQueue(items),true,items)}));
-    r.appendChild(btn('✅ 뜻 고르기 ('+q.length+')',null,function(){startVS('quiz',todayQueue(items),true,items)}));
+    r.appendChild(btn('🃏 카드 넘기기 ('+gi.length+')','primary',function(){startVS('card',shuffle(gi.slice()),true,items)}));
+    r.appendChild(btn('✅ 뜻 고르기 ('+gi.length+')',null,function(){startVS('quiz',shuffle(gi.slice()),true,items)}));
     pn.appendChild(r);
-    if(!q.length)pn.appendChild(mk('p','status','오늘 할 복습이 없습니다. 아래에서 골라서 공부할 수 있습니다.'));
+    var r1=mk('div','row');
+    r1.appendChild(btn('다시 볼 단어만 ('+due.length+')',null,function(){startVS('card',shuffle(due.slice()),false,items)}));
+    r1.appendChild(btn('아직 안 본 단어만 ('+nw.length+')',null,function(){startVS('card',shuffle(nw.slice()),false,items)}));
+    pn.appendChild(r1);
     if(state.msg)pn.appendChild(mk('p','status err',state.msg));
     app.appendChild(pn);
     var cp=mk('section','panel');cp.appendChild(mk('h2',null,'골라서 공부하기'));
     var row=mk('div','row');
     var ms=mk('select');ms.id='vs-mode';[['card','카드 넘기기'],['quiz','뜻 고르기']].forEach(function(x){var o=mk('option',null,x[1]);o.value=x[0];ms.appendChild(o)});
-    var ps=mk('select');ps.id='vs-pass';var o0=mk('option',null,(opts&&opts.allLabel)||'모든 지문');o0.value='';ps.appendChild(o0);
-    ((opts&&opts.scopes)||allPassages().map(function(p){return [p.id,pname(p)]})).forEach(function(x){var o=mk('option',null,x[1]);o.value=x[0];ps.appendChild(o)});
+    var ps=mk('select');ps.id='vs-pass';var o0=mk('option',null,g.label+' 전체');o0.value='';ps.appendChild(o0);
+    (g.subs||[]).forEach(function(x){var o=mk('option',null,x[1]);o.value=x[0];ps.appendChild(o)});
     row.appendChild(ms);row.appendChild(ps);cp.appendChild(row);
-    function scoped(){return items.filter(function(x){return !ps.value||x.pid===ps.value||x.cid===ps.value})}
+    function scoped(){return gi.filter(function(x){return !ps.value||x.pid===ps.value})}
     var r2=mk('div','row');
     r2.appendChild(btn('이 범위 전부',null,function(){startVS(ms.value,shuffle(scoped()),false,items)}));
-    r2.appendChild(btn('자주 틀린 단어',null,function(){startVS(ms.value,shuffle(scoped().filter(function(x){var r=v[x.k];return r&&(r.ng||0)>=2})),false,items)}));
+    r2.appendChild(btn('자주 틀린 단어',null,function(){startVS(ms.value,shuffle(scoped().filter(function(x){var rr=v[x.k];return rr&&(rr.ng||0)>=2})),false,items)}));
     r2.appendChild(btn('★ 별표 단어',null,function(){startVS(ms.value,shuffle(scoped().filter(function(x){return v[x.k]&&v[x.k].star})),false,items)}));
     r2.appendChild(btn('아무거나 20개',null,function(){startVS(ms.value,shuffle(scoped()).slice(0,20),false,items)}));
     cp.appendChild(r2);app.appendChild(cp);
@@ -1412,10 +1434,6 @@ var EXAMPLE5=[
       var n=Date.UTC(y,m,day)/86400000,c=mk('span',(st.done&&st.done[n]?'done ':'')+(n===d?'today':''),String(day));cal.appendChild(c);
     }
     cp.appendChild(cal);cp.appendChild(mk('p','rec','오늘 복습을 끝내면 빨간 동그라미가 그려집니다.'));app.appendChild(cp);
-    var sp=mk('section','panel');sp.appendChild(mk('h2',null,'하루 새 단어 수'));
-    var sel=mk('select');sel.id='vs-new';[5,10,20,30].forEach(function(x){var o=mk('option',null,x+'개');o.value=String(x);if(setOf().newPerDay===x)o.selected=true;sel.appendChild(o)});
-    sel.addEventListener('change',function(){setOf().newPerDay=parseInt(sel.value,10);save()});
-    sp.appendChild(sel);app.appendChild(sp);
   }
 
   function viewSession(app){
@@ -1893,19 +1911,24 @@ var EXAMPLE5=[
     var pool=chItems();
     return CH_CHAPTERS.map(function(c){return {n:c.c,label:'천일문 Chapter '+c.c,items:pool.filter(function(x){return chapterOf(x.u)===c.c}),pool:pool,chunil:true}});
   }
+  function chGroups(){
+    return CH_CHAPTERS.map(function(c){
+      return {id:'c'+c.c,label:'Chapter '+c.c,match:function(x){return x.cid==='c'+c.c},subs:c.units.map(function(u){return ['u'+u,chTitle(u)]})};
+    });
+  }
   function viewChunil(app){
     if(state.vs){viewSession(app);return}
     if(state.exam&&state.exam.r.chunil){viewExam(app);return}
     var items=chStudy();
     app.appendChild(mk('h2',null,'천일문 단어장'));
-    app.appendChild(mk('p','lead','Chapter 2(UNIT 8~14와 추가 표현), Chapter 3(UNIT 15~20) 단어입니다. 알아요를 누르면 1 → 3 → 7 → 14 → 30 → 60일 뒤에 다시 나옵니다.'));
+    app.appendChild(mk('p','lead','Chapter 2(UNIT 8~14와 추가 표현), Chapter 3(UNIT 15~20) 단어입니다. Chapter 단위로 공부합니다.'));
     var tabs=mk('div','chips'),cur=state.cTab||'today';
     [['today','오늘'],['words','단어'],['exam','시험'],['rec','기록']].forEach(function(t){tabs.appendChild(btn(t[1],'pill'+(cur===t[0]?' on':''),function(){state.cTab=t[0];state.msg='';render()}))});
     app.appendChild(tabs);
     if(cur==='exam')vExam(app,chRounds(),'천일문 단어 시험','Chapter 단위로 출제됩니다. Chapter 2는 UNIT 8~14와 추가 표현, Chapter 3은 UNIT 15~20 단어입니다. 끝나면 바로 점수와 문제별 채점 결과가 나오고, 구글 시트로도 전송됩니다.');
     else if(cur==='words')vWords(app,items);
     else if(cur==='rec')vRecord(app,items);
-    else vToday(app,items,{allLabel:'모든 단어',scopes:CH_CHAPTERS.map(function(c){return ['c'+c.c,'Chapter '+c.c+' 전체']}).concat(CH_UNITS.map(function(u){return ['u'+u,chTitle(u)]}))});
+    else vToday(app,items,{groups:chGroups(),gkey:'cGroup',unitLabel:'Chapter'});
   }
 
   /* ---------- 라우팅 ---------- */
