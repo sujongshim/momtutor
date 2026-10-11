@@ -1170,6 +1170,17 @@ var EXAMPLE5=[
     state.exam={r:r,name:name,type:type,qs:qs,i:0,ok:0,wrong:[],done:false,sent:'idle',attempt:attempt};
     render();
   }
+  function startRetry(ex){
+    var pool=(ex.r.pool||vocabItems(allPassages())).map(function(x){return x.m}).filter(function(m){return m&&m.length<=40});
+    var items=ex.qs.filter(function(q){return !q.ok}).map(function(q){return q.it});
+    var qs=shuffle(items).map(function(it){
+      var d=[];
+      if(ex.type==='객관식')shuffle(pool.slice()).forEach(function(m){if(m!==it.m&&d.indexOf(m)<0&&d.length<3)d.push(m)});
+      return {it:it,opts:ex.type==='객관식'?shuffle([it.m].concat(d)):null,ans:'',ok:false};
+    });
+    state.exam={r:ex.r,name:ex.name,type:ex.type,qs:qs,i:0,ok:0,wrong:[],done:false,sent:'skip',attempt:ex.attempt,retry:(ex.retry||0)+1};
+    render();
+  }
   function sendExam(ex){
     ex.sent='sending';
     var wrong=ex.qs.filter(function(q){return !q.ok}).map(function(q){return ex.type==='주관식'?q.it.h+' (내 답: '+(q.ans||'무응답')+')':q.it.h});
@@ -1181,6 +1192,7 @@ var EXAMPLE5=[
   }
   function finishExam(ex){
     ex.done=true;
+    if(ex.retry){ex.sent='skip';return}
     try{
       var stt=examStats(),k=examKey(ex.r,ex.type),cur=stt[k]||{n:0,best:0};
       cur.n=ex.attempt;cur.best=Math.max(cur.best||0,ex.ok);cur.total=ex.qs.length;stt[k]=cur;
@@ -1246,11 +1258,11 @@ var EXAMPLE5=[
     var ex=state.exam,panel=mk('section','panel');
     if(ex.done){
       var total=ex.qs.length,pct=Math.round(ex.ok/total*100);
-      panel.appendChild(mk('h2',null,ex.r.label+' '+ex.type+' 시험 결과 · '+ex.attempt+'번째'));
+      panel.appendChild(mk('h2',null,ex.retry?ex.r.label+' 틀린 단어 다시 풀기 결과 · '+ex.retry+'차':ex.r.label+' '+ex.type+' 시험 결과 · '+ex.attempt+'번째'));
       var big=mk('p','qstem big',ex.ok+' / '+total+'  ('+pct+'점)');
       panel.appendChild(big);
       panel.appendChild(mk('p','lead',ex.name+' · 맞힌 단어 '+ex.ok+'개, 틀린 단어 '+(total-ex.ok)+'개'));
-      var msg={sending:'구글 시트에 저장하는 중입니다.',ok:'구글 시트에 저장했습니다.',noconfig:'아직 구글 시트가 연결되지 않아 점수는 이 화면에만 표시됩니다.',fail:'시트 저장에 실패했습니다. 인터넷을 확인하고 다시 보내 주세요.',idle:''}[ex.sent]||'';
+      var msg={sending:'구글 시트에 저장하는 중입니다.',ok:'구글 시트에 저장했습니다.',noconfig:'아직 구글 시트가 연결되지 않아 점수는 이 화면에만 표시됩니다.',fail:'시트 저장에 실패했습니다. 인터넷을 확인하고 다시 보내 주세요.',idle:'',skip:'다시 풀기 결과는 시트에 보내지 않습니다. 처음 본 시험 점수만 기록됩니다.'}[ex.sent]||'';
       if(msg)panel.appendChild(mk('p','status'+(ex.sent==='fail'?' err':''),msg));
       if(ex.sent==='fail'||ex.sent==='noconfig')panel.appendChild(btn('다시 보내기',null,function(){sendExam(ex);render()}));
       panel.appendChild(mk('p','lead','문제별 채점'));
@@ -1269,15 +1281,17 @@ var EXAMPLE5=[
         ul.appendChild(li);
       });
       panel.appendChild(ul);
+      if(!ex.wrong.length)panel.appendChild(mk('p','status','틀린 단어가 없습니다. 모두 맞혔어요!'));
       var r2=mk('div','row');
-      r2.appendChild(btn('같은 시험 다시 보기','outline',function(){startExam(ex.r,ex.name,ex.type)}));
-      if(ex.wrong.length)r2.appendChild(btn(ex.r.chunil?'천일문 단어 보며 복습하기':'단어 탭에서 복습하기','primary',function(){state.exam=null;state.vs=null;if(ex.r.chunil)state.cTab='words';else state.vtab='words';render()}));
+      if(ex.wrong.length)r2.appendChild(btn('틀린 단어 다시 풀기 ('+ex.wrong.length+')','primary',function(){startRetry(ex)}));
+      if(ex.wrong.length)r2.appendChild(btn(ex.r.chunil?'천일문 단어 보며 복습하기':'단어 탭에서 복습하기',null,function(){state.exam=null;state.vs=null;if(ex.r.chunil)state.cTab='words';else state.vtab='words';render()}));
+      r2.appendChild(btn('처음부터 다시 시험 보기','outline',function(){startExam(ex.r,ex.name,ex.type)}));
       r2.appendChild(btn('끝내기',null,function(){state.exam=null;render()}));
       panel.appendChild(r2);app.appendChild(panel);return;
     }
     var q=ex.qs[ex.i];
     var top=mk('div','bar');
-    top.appendChild(mk('span','cnt',ex.r.label+' '+ex.type+' '+ex.attempt+'번째 · '+(ex.i+1)+' / '+ex.qs.length));
+    top.appendChild(mk('span','cnt',ex.retry?ex.r.label+' '+ex.type+' 틀린 단어 다시 풀기 '+ex.retry+'차 · '+(ex.i+1)+' / '+ex.qs.length:ex.r.label+' '+ex.type+' '+ex.attempt+'번째 · '+(ex.i+1)+' / '+ex.qs.length));
     top.appendChild(btn('그만하기',null,function(){state.exam=null;render()}));
     panel.appendChild(top);
     var pg=mk('div','prog'),bar=mk('i');bar.style.width=(ex.i/ex.qs.length*100)+'%';pg.appendChild(bar);panel.appendChild(pg);
