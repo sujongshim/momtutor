@@ -301,12 +301,14 @@ var EXAMPLE3=[
     translation:`일부 연구자들은 구어를 정확한 차이를 포착하기에는 불완전한 도구로 본다.`,
     points:[
      {label:``,phrase:`view spoken languages as`,type:`어휘`,entry:`view A as B`,meaning:`A를 B로 여기다`,explanation:`view A as B = A를 B로 간주.`},
+     {label:``,phrase:`incomplete`,type:`어휘`,entry:`incomplete`,meaning:`불완전한`,explanation:`in(부정) + complete(완전한). incomplete devices = 불완전한 도구.`},
      {label:`전치사 + 동명사`,phrase:`for capturing precise differences`,type:`어법`,explanation:`for는 전치사, 뒤에 목적어(동명사). devices 후치 수식.`}]},
    {text:`They think numbers represent the most neutral language of description.`,
     translation:`그들은 숫자가 가장 중립적인 서술 언어를 나타낸다고 생각한다.`,
     points:[
      {label:`They = researchers`,phrase:`They`,type:`대명사`,explanation:`They = Some researchers.`},
-     {label:`that 생략`,phrase:`think numbers represent`,at:`think`,type:`어법`,explanation:`think와 numbers 사이에 명사절 접속사 that 생략. 뒤는 완전한 문장.`},
+     {label:`that 생략`,phrase:`think numbers represent`,at:`think`,type:`어법`,vocab:true,entry:`represent`,meaning:`나타내다, 대표하다`,explanation:`think와 numbers 사이에 명사절 접속사 that 생략. 뒤는 완전한 문장.`},
+     {label:``,phrase:`description`,type:`어휘`,entry:`description`,meaning:`서술, 묘사`,explanation:`describe(서술하다)의 명사형. language of description = 서술 언어.`},
      {label:``,phrase:`neutral`,type:`어휘`,meaning:`중립적인`,explanation:`형용사. language 수식.`}]},
    {text:`However, when our language of description is changed to numbers, we do not move toward greater (a) accuracy.`,
     translation:`그러나 우리의 서술 언어가 숫자로 바뀐다고 해서 더 큰 정확성에 가까워지는 것은 아니다.`,
@@ -314,7 +316,7 @@ var EXAMPLE3=[
      {label:`역접`,phrase:`However`,type:`연결어`,explanation:`However = 역접. 앞 내용과 반대.`},
      {label:`시간`,phrase:`when`,ctx:`when our language`,type:`연결어`,explanation:`when = 시간 접속사. ~할 때.`},
      {label:``,phrase:`move toward`,type:`어휘`,entry:`move toward ~`,meaning:`~쪽으로 나아가다`,explanation:`move toward greater accuracy = 더 큰 정확성으로 나아가다.`},
-     {label:`①`,phrase:`accuracy`,type:`보기`,meaning:`정확성`,explanation:`적절. 숫자로 바꿔도 정확성이 높아지지 않음.`}]},
+     {label:`①`,phrase:`accuracy`,type:`보기`,vocab:true,entry:`accuracy`,meaning:`정확성`,explanation:`적절. 숫자로 바꿔도 정확성이 높아지지 않음.`}]},
    {key:true,text:`Numbers are no more appropriate ‘pictures of the world’ than words, music, or painting.`,
     translation:`숫자는 말, 음악, 그림보다 더 적절한 '세상의 그림'이 아니다.`,
     points:[
@@ -324,7 +326,7 @@ var EXAMPLE3=[
    {text:`While useful for specific purposes (e.g. census taking, income distribution), they (b) include information of enormous value.`,
     translation:`특정한 목적(예: 인구 조사, 소득 분배)에는 유용하지만, 숫자에는 막대한 가치가 있는 정보가 포함되어 있다.`,
     points:[
-     {label:`양보`,phrase:`While`,type:`연결어`,explanation:`While = 양보 접속사. 비록 ~이지만.`},
+     {label:`양보`,phrase:`While`,type:`연결어`,explanation:`While의 뜻 3가지: ① ~하는 동안(시간) ② ~인 반면(대조) ③ ~이지만(양보). 여기서는 ③ 비록 ~이지만.`},
      {label:`S + be 생략`,phrase:`useful for specific purposes`,type:`어법`,explanation:`While (they are) useful ~. 부사절의 주어와 be동사 생략.`},
      {label:`they = numbers`,phrase:`they`,type:`대명사`,explanation:`they = numbers.`},
      {label:`②`,phrase:`include`,type:`보기`,meaning:`포함하다`,explanation:`적절. 숫자가 가치 있는 정보를 포함.`},
@@ -353,18 +355,21 @@ var EXAMPLE3=[
      {label:`전치사 + 관계대명사`,phrase:`which`,ctx:`in which statistical`,type:`관계사`,explanation:`in which. 뒤는 완전한 문장(statistical results can be manipulated).`},
      {label:`전치사 + 관계대명사`,phrase:`which`,ctx:`in which turning`,type:`관계사`,explanation:`in which. 뒤는 완전한 문장(turning ~ is ~).`},
      {label:`동명사 주어`,phrase:`turning people's lives into numbers`,type:`어법`,explanation:`동명사구 주어, 단수 동사 is.`},
-     {label:`④`,phrase:`morally`,type:`보기`,meaning:`도덕적으로`,explanation:`적절. insulating = 차단하는. 숫자화가 도덕적으로 감정을 차단함.`}]},
+     {label:``,phrase:`manipulate`,type:`어휘`,entry:`manipulate`,meaning:`조작하다`,explanation:`본문 각주. be manipulated = 조작되다(수동).`},
+     {label:``,phrase:`insulating`,type:`어휘`,entry:`insulating`,meaning:`차단하는`,explanation:`본문 각주. insulate(차단하다)의 -ing형, morally insulating = 도덕적으로 (감정을) 차단하는.`},
+     {label:`④`,phrase:`morally`,type:`보기`,vocab:true,entry:`morally`,meaning:`도덕적으로`,explanation:`적절. insulating = 차단하는. 숫자화가 도덕적으로 감정을 차단함.`}]},
    {text:`Statistics on crime, homelessness, or the spread of a disease say nothing of people's suffering.`,
     translation:`범죄, 노숙, 질병의 확산에 관한 통계는 사람들의 고통에 대해 아무것도 말해 주지 않는다.`,
     points:[
      {label:`병렬`,phrase:`crime, homelessness, or the spread of a disease`,type:`병렬`,explanation:`on의 목적어 A, B, or C 병렬.`},
+     {label:``,phrase:`suffering`,type:`어휘`,entry:`suffering`,meaning:`고통`,explanation:`suffer(고통받다)의 명사형. suffering = 사람들이 겪는 고통.`},
      {label:``,phrase:`say nothing of`,type:`어휘`,entry:`say nothing of ~`,meaning:`~에 대해 아무것도 말해 주지 않다`,explanation:`통계는 고통을 담지 못함.`}]},
    {key:true,text:`We read the statistics as reports on events at a distance, thus allowing us to (e) escape human beings without being disturbed.`,
     translation:`우리는 통계를 멀리 떨어진 사건에 대한 보고로 읽고, 그래서 방해받지 않고 인간을 (마주할) 수 있게 된다.`,
     points:[
      {label:``,phrase:`read the statistics as`,type:`어휘`,entry:`read A as B`,meaning:`A를 B로 읽다, 해석하다`,explanation:`read A as B = A를 B로 받아들임.`},
-     {label:`분사구문`,phrase:`thus allowing us to`,eq:` us`,type:`어법`,explanation:`결과 분사구문. = and thus it allows us to ~. 또 allow + O + to V는 5형식(S + V + O + OC): us(O) = to escape(OC).`},
-     {label:`⑤`,phrase:`escape`,type:`보기`,meaning:`피하다`,explanation:`부적절. encounter(마주하다)가 적절. 거리를 두고 통계로 보면 방해받지 않고 사람들을 접하게 됨.`},
+     {label:`분사구문`,phrase:`thus allowing us to`,eq:` us`,type:`어법`,vocab:true,entry:`allow A to-v`,meaning:`A가 v하도록 허용하다[가능하게 하다]`,explanation:`결과 분사구문. = and thus it allows us to ~. 또 allow + O + to V는 5형식(S + V + O + OC): us(O) = to escape(OC).`},
+     {label:`⑤`,phrase:`escape`,type:`보기`,vocab:true,entry:`escape`,meaning:`피하다, 벗어나다`,explanation:`부적절. encounter(마주하다)가 적절. 거리를 두고 통계로 보면 방해받지 않고 사람들을 접하게 됨.`},
      {label:`수동 동명사`,phrase:`without being disturbed`,type:`어법`,explanation:`without + being p.p. 방해받지 않고.`}]},
    {text:`Statistics are human beings with the tears wiped off.`,
     translation:`통계는 눈물이 닦여 나간 인간이다.`,
@@ -389,12 +394,14 @@ var EXAMPLE4=[
      {label:`it = 대수의 법칙`,phrase:`it`,type:`대명사`,explanation:`it = the law of large numbers.`},
      {label:`the 비교급 ~, the 비교급 ~`,phrase:`the more often`,group:`thecomp1`,type:`어법`,explanation:`the + 비교급 ~, the + 비교급 ~ = ~할수록 더 ~.`},
      {label:`the 비교급 ~, the 비교급 ~`,phrase:`the closer`,group:`thecomp1`,type:`어법`,explanation:`the + 비교급 ~, the + 비교급 ~의 뒷부분.`},
+     {label:``,phrase:`average`,type:`어휘`,entry:`average`,meaning:`평균; 평균의`,explanation:`the average of the results = 결과의 평균.`},
      {label:``,phrase:`conducted`,type:`어휘`,meaning:`수행하다, 실시하다`,explanation:`experiment is conducted = 실험이 실시됨.`},
      {label:`수동 + to부정사`,phrase:`can be expected to match`,type:`어법`,explanation:`expect A to V의 수동태. be expected to + 동사원형.`}]},
    {text:`① For instance, on your first encounter with the game of roulette, you may have beginner's luck after betting on 7.`,
     translation:`① 예를 들어, 룰렛 게임을 처음 접할 때 7에 돈을 건 뒤 초심자의 행운을 얻을 수도 있다.`,
     points:[
      {label:``,phrase:`beginner's luck`,type:`어휘`,entry:`beginner's luck`,meaning:`초심자의 행운`,explanation:`처음 하는 사람이 얻는 우연한 행운.`},
+     {label:``,phrase:`encounter`,type:`어휘`,entry:`encounter`,meaning:`만남, 마주침; 마주치다`,explanation:`first encounter with ~ = ~와의 첫 만남. 동사로도 쓰임(marked 보기 ⑤에서 encounter).`},
      {label:`전치사 + 동명사`,phrase:`after betting on 7`,type:`어법`,explanation:`after는 전치사, 뒤에 목적어(동명사).`}]},
    {text:`② But the more often you repeat this bet, the closer the relative frequency of wins and losses is expected to approach the true chance of winning, meaning that your luck will at some point fade away.`,
     translation:`② 그러나 이 내기를 더 자주 반복할수록 승패의 상대도수는 실제 이길 확률에 더 가까워질 것으로 기대되며, 이는 당신의 행운이 언젠가 사라진다는 뜻이다.`,
@@ -422,12 +429,14 @@ var EXAMPLE4=[
      {label:``,phrase:`large amounts of`,type:`어휘`,entry:`large amounts of ~`,meaning:`많은 양의 ~`,explanation:`뒤에 불가산명사 data.`},
      {label:``,phrase:`figure out`,type:`어휘`,entry:`figure out`,meaning:`알아내다`,explanation:`to figure out = 부사적 용법(목적).`},
      {label:`동격 that`,phrase:`that`,ctx:`chances that drivers`,type:`어법`,explanation:`chances와 동격인 명사절 접속사 that. 뒤는 완전한 문장.`},
+     {label:``,phrase:`region`,type:`어휘`,entry:`region`,meaning:`지역`,explanation:`age, region, or car brand = 나이, 지역, 차 브랜드(병렬).`},
      {label:`분사구문`,phrase:`depending on their age, region, or car brand`,type:`어법`,explanation:`분사구문. depending on = ~에 따라.`}]},
    {text:`⑤ Both casinos and insurance industries rely on the law of large numbers to balance individual losses.`,
     translation:`⑤ 카지노와 보험 산업 모두 개별 손실을 균형 잡기 위해 대수의 법칙에 의존한다.`,
     points:[
      {label:`both A and B`,phrase:`Both casinos and insurance industries`,type:`어법`,explanation:`both A and B = A와 B 둘 다. 복수 주어.`},
      {label:``,phrase:`rely on`,type:`어휘`,entry:`rely on ~`,meaning:`~에 의존하다`,explanation:`= depend on.`},
+     {label:``,phrase:`individual`,type:`어휘`,entry:`individual`,meaning:`개별의, 개인의`,explanation:`individual losses = 개별 손실. 앞에서 balance(균형 잡다)의 목적어.`},
      {label:`부사적 용법(목적)`,phrase:`to balance individual losses`,type:`어법`,explanation:`to부정사의 부사적 용법(목적).`}]}
   ];
 var EXAMPLE5=[
@@ -436,11 +445,15 @@ var EXAMPLE5=[
     points:[
      {label:`명사절 주어`,phrase:`Whether we feel happy or sad, content or discontent`,type:`어법`,explanation:`whether 명사절이 주어. 단수 취급, 동사 is.`},
      {label:``,phrase:`content or discontent`,type:`어휘`,entry:`content / discontent`,meaning:`만족하는 / 불만족하는`,explanation:`형용사 content = 만족하는.`},
+     {label:`수동`,phrase:`is not determined`,type:`어법`,explanation:`be + p.p. 수동태. determine(결정하다) → be determined by ~ = ~에 의해 결정되다. 앞의 Whether절이 주어이므로 단수 동사 is.`,vocab:true,entry:`determine`,meaning:`결정하다 (be determined by ~: ~에 의해 결정되다)`},
+     {label:``,phrase:`merely`,type:`어휘`,entry:`merely`,meaning:`단지, 그저`,explanation:`merely by ~ = 단지 ~만으로. only와 비슷한 부사.`},
+     {label:``,phrase:`individual`,type:`어휘`,entry:`individual`,meaning:`개개의, 각각의; 개인`,explanation:`each individual successive moment = 각각의 연속된 순간 하나하나.`},
      {label:``,phrase:`successive`,type:`어휘`,meaning:`연속적인`,explanation:`moment 수식.`}]},
    {text:`While our experiences affect our mood, we are not blown in a completely new direction by each gust of wind.`,
     translation:`우리의 경험이 기분에 영향을 주지만, 우리는 바람이 한 번 불 때마다 완전히 새로운 방향으로 날려 가지는 않는다.`,
     points:[
-     {label:`양보`,phrase:`While`,type:`연결어`,explanation:`While = 양보 접속사. 비록 ~이지만.`},
+     {label:`양보`,phrase:`While`,type:`연결어`,explanation:`While의 뜻 3가지: ① ~하는 동안(시간) ② ~인 반면(대조) ③ ~이지만(양보). 여기서는 ③ 비록 ~이지만.`},
+     {label:`수동`,phrase:`are not blown`,type:`어법`,explanation:`be + p.p. 수동태의 부정. be blown = 날려 가다. by each gust of wind = 바람 한 번마다(행위자).`},
      {label:``,phrase:`gust of wind`,type:`어휘`,entry:`a gust of wind`,meaning:`한 줄기 돌풍`,explanation:`기분이 순간 경험에 휘둘리지 않음의 비유.`}]},
    {key:true,text:`As humans, we adjust — to new information and events both good and bad — and return to our personal default level of well-being.`,
     translation:`인간으로서 우리는 좋든 나쁘든 새로운 정보와 사건에 적응하고, 개인의 기본적인 행복 수준으로 돌아온다.`,
@@ -455,6 +468,7 @@ var EXAMPLE5=[
     points:[
      {label:`역접`,phrase:`but`,type:`연결어`,explanation:`but = 역접. 기복은 있으나 결국 기준선으로 돌아옴.`},
      {label:``,phrase:`over time`,type:`어휘`,entry:`over time`,meaning:`시간이 지나면서`,explanation:`시간이 흐르며 기준선으로 복귀.`},
+     {label:`수동`,phrase:`are pulled`,type:`어법`,explanation:`be + p.p. 수동태. are pulled toward ~ = ~쪽으로 끌려간다.`},
      {label:`후치 수식`,phrase:`seeking its own level`,type:`어법`,explanation:`현재분사구, water 후치 수식. = which seeks.`},
      {label:``,phrase:`baseline`,type:`어휘`,meaning:`기준선`,explanation:`원래의 기본 수준.`},
      {label:`병렬`,phrase:`back up after bad news and back down after good`,type:`병렬`,explanation:`back up ~ and back down ~ 병렬. after good (news): news 생략.`}]},
@@ -462,12 +476,13 @@ var EXAMPLE5=[
     translation:`첫사랑의 황홀감은 사라지고, 이별의 절망도 마찬가지로 사라진다.`,
     points:[
      {label:``,phrase:`euphoria`,type:`어휘`,meaning:`(극도의) 행복감`,explanation:`본문 각주.`},
-     {label:`so + 조동사 + S`,phrase:`so does the despair of a break-up`,type:`어법`,explanation:`도치. so + 조동사 + S = ~도 그렇다. does = fades.`},
+     {label:`so + 조동사 + S`,phrase:`so does the despair of a break-up`,type:`어법`,explanation:`도치. so + (be / 조동사 / do·does·did) + S = S도 그렇다. 앞 문장의 동사가 일반동사(fades)이면 so does + S, be동사이면 so is/are + S, 조동사이면 so can/will + S.`},
      {label:``,phrase:`despair`,type:`어휘`,meaning:`절망`,explanation:`euphoria와 반대 감정.`}]},
    {text:`This tendency is best seen with little kids and their toy joy: When they get what they've longed for, they believe they will be happy for the rest of their lives.`,
     translation:`이 경향은 어린아이들과 그들의 장난감 기쁨에서 가장 잘 보인다. 간절히 바라던 것을 얻으면 그들은 평생 행복할 것이라고 믿는다.`,
     points:[
      {label:`시간`,phrase:`When`,type:`연결어`,explanation:`When = 시간 접속사. ~할 때.`},
+     {label:`수동`,phrase:`is best seen`,type:`어법`,explanation:`be + p.p. 수동태. best = well의 최상급(부사), is best seen = 가장 잘 보인다.`},
      {label:`they = kids`,phrase:`they`,ctx:`When they get`,type:`대명사`,explanation:`they = little kids.`},
      {label:`관계대명사`,phrase:`what`,ctx:`what they've longed`,type:`관계사`,explanation:`what = the thing that. get의 목적어 명사절. 관계대명사 뒤는 불완전한 문장(for의 목적어 없음).`},
      {label:``,phrase:`longed for`,type:`어휘`,entry:`long for ~`,meaning:`~을 간절히 바라다`,explanation:`long for = 간절히 원하다.`},
@@ -481,7 +496,7 @@ var EXAMPLE5=[
     translation:`그러나 곧 아이들은 어른들처럼 ____________.`,
     points:[
      {label:`역접`,phrase:`But`,type:`연결어`,explanation:`But = 역접. 행복해진다는 믿음과 반대로 이어짐.`},
-     {label:`① 정답`,phrase:`____________`,type:`보기`,meaning:`adapt: 적응하다`,explanation:`정답 adapt. 앞에서 we adjust ~ return to default level. 아이들도 어른처럼 새 상황에 적응해 원래 수준으로 돌아옴.`}]}
+     {label:`① 정답`,phrase:`____________`,type:`보기`,vocab:true,entry:`adapt`,meaning:`적응하다`,explanation:`정답 adapt. 앞에서 we adjust ~ return to default level. 아이들도 어른처럼 새 상황에 적응해 원래 수준으로 돌아옴.`}]}
   ];
   var NAMES={0:'정답 근거',1:'어법',2:'단어·표현',3:'대명사',4:'병렬',5:'관계사',6:'보기',7:'연결어'};
   var GRAMTYPES={'어법':1,'관계사':1,'연결어':1,'대명사':1};
@@ -646,7 +661,7 @@ var EXAMPLE5=[
     plist.forEach(function(p){(p.sentences||[]).forEach(function(s){(Array.isArray(s.points)?s.points:[]).forEach(function(pt){
       if((pt.type!=='어휘'&&!pt.vocab)||pt.nowb)return;
       var h=String(pt.entry||pt.phrase||''),k=h.toLowerCase();
-      if(!h||seen[k])return;seen[k]=1;
+      var sk=p.id+'|'+k;if(!h||seen[sk])return;seen[sk]=1;
       items.push({k:k,h:h,m:String(pt.meaning||pt.explanation||''),s:String(s.text||''),p:String(pt.phrase||''),pid:p.id,book:p.book,src:pname(p)});
     })})});
     return items;
@@ -1536,8 +1551,12 @@ var EXAMPLE5=[
     pts:['목적격 관계대명사(that/which) 생략: 명사 + 주어 + 동사 모양이 보이면 사이에 관계대명사가 생략된 것입니다.','주격 관계대명사 + be동사 생략: 명사 뒤에 분사(-ing / p.p.)나 전치사구가 바로 오면 (who/which + be)가 생략된 것입니다. 이것이 분사의 후치 수식입니다.','접속사 that 생략: think, know, say, realize 등 뒤에 주어 + 동사가 바로 오면 that이 생략된 것입니다.'],
     ex:[['The science we learn in grade school','초등학교에서 배우는 과학','science we learn'],['a species born in a time','한 시대에 태어난 종','born in a time'],['inferences based upon many observations','많은 관찰에 근거한 추론','based upon many observations'],['They think numbers represent the most neutral language','그들은 숫자가 가장 중립적인 언어라고 생각한다','think numbers represent']]},
    {no:[2,6,8,9,12],t:'5. 접속사 vs 전치사',
-    pts:['접속사 뒤에는 절(주어 + 동사), 전치사 뒤에는 명사(구)나 동명사가 옵니다.','because + 절, because of + 명사. while + 절, during + 명사. although + 절, despite + 명사.','등위접속사 and, but, or, yet, for는 앞뒤를 같은 형태로 잇습니다. for는 문장 중간에서 "왜냐하면"(= because)입니다.','when, if, while, because는 부사절을 이끄는 접속사이므로 뒤에 S + V가 옵니다.'],
+    pts:['접속사 뒤에는 절(주어 + 동사), 전치사 뒤에는 명사(구)나 동명사가 옵니다.','because + 절, because of + 명사. while + 절, during + 명사. although + 절, despite + 명사.','등위접속사 and, but, or, yet, for는 앞뒤를 같은 형태로 잇습니다. for는 문장 중간에서 "왜냐하면"(= because)입니다.','when, if, while, because는 부사절을 이끄는 접속사이므로 뒤에 S + V가 옵니다.','while은 뜻이 3가지: ① ~하는 동안(시간) ② ~인 반면(대조) ③ ~이지만(양보). 문맥으로 구별합니다.'],
     ex:[['they are happy to share because it is in their interest','그것이 자신들에게 이익이 되기 때문에 기꺼이 나눈다','because it is'],['you may have beginner\'s luck after betting on 7','7에 돈을 건 뒤에 초심자의 행운을 얻을 수도 있다','after betting']]},
+   {no:[2,8,12],t:'수동태 (be + p.p.)',
+    pts:['능동 S + V + O → 수동 O + be + p.p. (+ by S). 행위자가 중요하지 않거나 분명하면 by ~는 생략합니다.','be가 시제와 인칭을 가집니다: is determined, are pulled, was won.','부정은 be 뒤에 not: are not blown(날려 가지 않는다).','is best seen의 best는 well의 최상급 부사로 "가장 잘"이라는 뜻입니다.','수동태 뒤에 by 대신 다른 전치사가 오는 경우도 있습니다: be tied to ~.'],
+    ex:[['we are pulled toward our baseline','우리는 기준선 쪽으로 끌려간다','are pulled'],['we are not blown in a completely new direction by each gust of wind','우리는 바람이 한 번 불 때마다 완전히 새로운 방향으로 날려 가지는 않는다','are not blown'],['This tendency is best seen with little kids','이 경향은 어린아이들에게서 가장 잘 보인다','is best seen']],
+    tip:'수동태는 "be + p.p."가 보이면 주어가 동작을 당하는지 확인하세요. 주어가 ~되다 / ~당하다 / ~지다로 해석되면 수동입니다.'},
    {no:[2],t:'6. Only + 부사(구/절) 도치: be·조동사 vs 일반동사',
     pts:['Only + 부사(구/절)가 문장 맨 앞에 오면, 뒤는 의문문 어순(도치)이 됩니다: Only + 부사 + 조동사/be + 주어 + 동사.','① be동사 문장: be동사를 주어 앞으로 보냅니다. (They are happy → Only then are they happy)','② 조동사(can, will, may, must 등) 문장: 조동사를 주어 앞으로 보내고 본동사는 원형 그대로. (You can see → Only now can you see)','③ 일반동사 문장: 조동사가 없으므로 do/does/did를 만들어 주어 앞에 쓰고, 본동사는 원형으로 돌려놓습니다. 시제와 인칭은 do/does/did가 가져갑니다. (You realize → do you realize / She knows → does she know / He learned → did he learn)','도치되는 것은 "Only 뒤 부사구/부사절" 바로 다음의 주절입니다. Only 부사절 안의 문장(when you start ...)은 도치하지 않습니다.','참고: Only가 주어를 꾸미면(Only he knows) 도치하지 않습니다. 부사(구·절)일 때만 도치.'],
     table:[['주절 동사','도치 방법','예'],['be동사','be + 주어','Only then was he calm.'],['조동사','조동사 + 주어 + 동사원형','Only now can you see it.'],['일반동사','do/does/did + 주어 + 동사원형','Only when you start ... do you realize']],
@@ -1611,6 +1630,7 @@ var EXAMPLE5=[
     if(/분사구문/.test(lb))add('8. 분사구문');
     if(/병렬/.test(lb))add('10. 병렬');
     if(/가주어|진주어/.test(lb))add('7. 가주어');
+    if(/^수동/.test(lb))add('수동태');
     if(/동격 that/.test(lb))add('1. that');
     if(/be 생략|보어 생략/.test(lb))add('4. 생략');
     if(/전치사 \+ 관계대명사/.test(lb))add('3. 관계부사');
