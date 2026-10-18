@@ -11,8 +11,10 @@ function clean(b) {
   if (score === null || total === null || score > total) return null;
   const name = str(b.name, 30);
   if (!name) return null;
-  const wrong = Array.isArray(b.wrong) ? b.wrong.slice(0, 200).map((w) => str(w, 60)).filter(Boolean) : [];
-  return { name, round: str(b.round, 40), range: str(b.range, 40), score, total, percent: Math.round((score / total) * 100), wrong };
+  const wrong = Array.isArray(b.wrong) ? b.wrong.slice(0, 200).map((w) => str(w, 160)).filter(Boolean) : [];
+  const type = b.type === '객관식' || b.type === '주관식' ? b.type : '';
+  const attempt = num(b.attempt, 1, 9999);
+  return { name, round: str(b.round, 40), range: str(b.range, 60), type, attempt: attempt === null ? '' : attempt, score, total, percent: Math.round((score / total) * 100), wrong };
 }
 
 module.exports = async (req, res) => {
